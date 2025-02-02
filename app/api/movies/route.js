@@ -1,63 +1,77 @@
 // app/api/movies/route.js
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { MongoClient } from "mongodb";
 
-// Chemin vers le fichier JSON
-const filePath = path.join(process.cwd(), "data", "movies.json");
-
-// Fonction pour lire les films depuis le fichier JSON
-function readMovies() {
-  try {
-    if (!fs.existsSync(filePath)) {
-      // Si le fichier n'existe pas, le créer avec un tableau vide
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, JSON.stringify([]), "utf8");
-    }
-    const data = fs.readFileSync(filePath, "utf8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Erreur de lecture du fichier:", error);
-    return [];
-  }
+// Vérifiez que la variable d'environnement est bien définie
+if (!process.env.MONGODB_URI) {
+  throw new Error("Please define the MONGODB_URI environment variable");
 }
 
-// Fonction pour écrire les films dans le fichier JSON
-function writeMovies(movies) {
-  fs.writeFileSync(filePath, JSON.stringify(movies, null, 2), "utf8");
+const uri = process.env.MONGODB_URI;
+let cachedClient = null;
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb };
+  }
+
+  const client = await MongoClient.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  const db = client.db(); // Utilise la base de données définie dans l'URI
+  cachedClient = client;
+  cachedDb = db;
+  return { client, db };
 }
 
 // GET : Renvoie la liste des films
 export async function GET() {
-  const movies = readMovies();
-  return NextResponse.json(movies);
+  try {
+    const { db } = await connectToDatabase();
+    const movies = await db.collection("movies").find({}).toArray();
+    return NextResponse.json(movies);
+  } catch (error) {
+    console.error("Error in GET:", error);
+    return NextResponse.json({ error: "Failed to fetch movies" }, { status: 500 });
+  }
 }
 
 // POST : Ajoute un film
 export async function POST(request) {
-  const movie = await request.json();
-  let movies = readMovies();
-  // Vérifier que le film n'existe pas déjà
-  if (!movies.some((m) => m.imdbID === movie.imdbID)) {
-    movies.push(movie);
-    writeMovies(movies);
+  try {
+    const movie = await request.json();
+    const { db } = await connectToDatabase();
+    // Vérifier que le film n'existe pas déjà
+    const existingMovie = await db.collection("movies").findOne({ imdbID: movie.imdbID });
+    if (existingMovie) {
+      return NextResponse.json({ error: "Movie already exists" }, { status: 400 });
+    }
+    await db.collection("movies").insertOne(movie);
     return NextResponse.json(movie, { status: 201 });
+  } catch (error) {
+    console.error("Error in POST:", error);
+    return NextResponse.json({ error: "Failed to add movie" }, { status: 500 });
   }
-  return NextResponse.json({ error: "Movie already exists" }, { status: 400 });
 }
 
 // DELETE : Supprime un film en fonction de son imdbID (passé en query)
 export async function DELETE(request) {
-  const { searchParams } = new URL(request.url);
-  const imdbID = searchParams.get("imdbID");
-  if (!imdbID) {
-    return NextResponse.json({ error: "Missing imdbID" }, { status: 400 });
+  try {
+    const { searchParams } = new URL(request.url);
+    const imdbID = searchParams.get("imdbID");
+    if (!imdbID) {
+      return NextResponse.json({ error: "Missing imdbID" }, { status: 400 });
+    }
+    const { db } = await connectToDatabase();
+    const result = await db.collection("movies").deleteOne({ imdbID });
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "Movie not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error in DELETE:", error);
+    return NextResponse.json({ error: "Failed to delete movie" }, { status: 500 });
   }
-  let movies = readMovies();
-  const newMovies = movies.filter((m) => m.imdbID !== imdbID);
-  if (newMovies.length === movies.length) {
-    return NextResponse.json({ error: "Movie not found" }, { status: 404 });
-  }
-  writeMovies(newMovies);
-  return NextResponse.json({ success: true });
 }

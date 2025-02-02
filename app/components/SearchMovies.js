@@ -179,16 +179,16 @@ export default function SearchMovies() {
             {movies.map((movie) => (
               <div
                 key={movie.imdbID}
-                className="relative border border-gray-300 rounded-lg overflow-hidden w-30 text-center shadow"
+                className="relative border border-gray-300 rounded-lg overflow-hidden w-40 text-center shadow"
               >
                 {movie.Poster && movie.Poster !== "N/A" ? (
                   <img
                     src={movie.Poster}
                     alt={movie.Title}
-                    className="w-full h-36 object-cover"
+                    className="w-full h-56 object-cover"
                   />
                 ) : (
-                  <div className="w-full h-36 bg-gray-200 flex items-center justify-center">
+                  <div className="w-full h-56 bg-gray-200 flex items-center justify-center">
                     Pas d'image
                   </div>
                 )}
