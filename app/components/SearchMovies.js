@@ -179,16 +179,16 @@ export default function SearchMovies() {
             {movies.map((movie) => (
               <div
                 key={movie.imdbID}
-                className="relative border border-gray-300 rounded-lg overflow-hidden w-40 text-center shadow"
+                className="relative border border-gray-300 rounded-lg overflow-hidden w-30 text-center shadow"
               >
                 {movie.Poster && movie.Poster !== "N/A" ? (
                   <img
                     src={movie.Poster}
                     alt={movie.Title}
-                    className="w-full h-56 object-cover"
+                    className="w-full h-36 object-cover"
                   />
                 ) : (
-                  <div className="w-full h-56 bg-gray-200 flex items-center justify-center">
+                  <div className="w-full h-36 bg-gray-200 flex items-center justify-center">
                     Pas d'image
                   </div>
                 )}
@@ -201,10 +201,9 @@ export default function SearchMovies() {
                   onClick={() => handleDeleteMovie(movie)}
                   className="group absolute top-1 left-1 bg-red-500 text-white text-xs px-2 py-1 rounded transition-colors hover:bg-red-600"
                 >
-                  <span className="block group-hover:hidden">
+                  <span className="block">
                     <img src="/trash.svg" alt="Supprimer" className="w-4 h-4" />
                   </span>
-                  <span className="hidden group-hover:block">Supprimer</span>
                 </button>
 
                 {/* Bouton Voir plus en haut à droite */}
@@ -214,10 +213,9 @@ export default function SearchMovies() {
                   rel="noopener noreferrer"
                   className="group absolute top-1 right-1 bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded transition-colors hover:bg-gray-200"
                 >
-                  <span className="block group-hover:hidden">
+                  <span className="block">
                     <img src="/link.svg" alt="Voir plus" className="w-4 h-4" />
                   </span>
-                  <span className="hidden group-hover:block">Voir plus</span>
                 </a>
               </div>
             ))}
