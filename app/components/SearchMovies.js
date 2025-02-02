@@ -41,7 +41,7 @@ export default function SearchMovies() {
 
     setLoading(true);
     const timeoutId = setTimeout(() => {
-      fetch(`http://www.omdbapi.com/?apikey=a2ca920d&s=${query}`)
+      fetch(`https://www.omdbapi.com/?apikey=a2ca920d&s=${query}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.Search) {
