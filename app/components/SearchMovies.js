@@ -11,12 +11,14 @@ export default function SearchMovies() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [movies, setMovies] = useState([]);
+  const [loadingMovies, setLoadingMovies] = useState(true);
   const [loading, setLoading] = useState(false);
   const [authorized, setAuthorized] = useState(false);
 
   // Chargement des films persistés au montage
   useEffect(() => {
     const fetchMovies = async () => {
+      setLoadingMovies(true);
       try {
         const response = await fetch("/api/movies");
         if (response.ok) {
@@ -28,8 +30,9 @@ export default function SearchMovies() {
       } catch (error) {
         console.error("Erreur lors du chargement des films :", error);
       }
+      setLoadingMovies(false);
     };
-
+  
     fetchMovies();
   }, []);
 
@@ -172,10 +175,14 @@ export default function SearchMovies() {
       {/* Section des films ajoutés */}
       <div className="w-full">
         <h2 className="text-2xl font-semibold mb-4 text-center">
-          Films dans la liste d'attente...
+          Films dans la liste d'attente
         </h2>
-        {movies.length === 0 ? (
-          <p className="text-center text-gray-500">Chargement des films...</p>
+        {loadingMovies ? (
+          <div className="flex justify-center items-center">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : movies.length === 0 ? (
+          <p className="text-center text-gray-500">Aucun film dans la liste d'attente</p>
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
             {movies.map((movie) => (
