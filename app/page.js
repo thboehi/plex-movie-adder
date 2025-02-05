@@ -137,6 +137,9 @@ export default function Home() {
       </details>
 
       <SearchMovies />
+      <div className="p-10 pt-20 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
+        <p className="text-gray-400 dark:text-gray-700">Site web créé et maintenu par <a className="text-neon-blue font-bold transition-all hover:underline" href="https://thbo.ch" target="_blank">thbo.ch</a></p>
+      </div>
     </main>
   );
 }
