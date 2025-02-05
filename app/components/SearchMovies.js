@@ -121,7 +121,7 @@ export default function SearchMovies() {
         placeholder="Rechercher un film..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md mb-8 focus:outline-none focus:ring focus:border-blue-300"
+        className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md mb-8 focus:outline-none focus:ring focus:border-blue-300 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800"
       />
 
       {/* Section des résultats de recherche */}
@@ -173,13 +173,13 @@ export default function SearchMovies() {
           Films dans la liste d'attente...
         </h2>
         {movies.length === 0 ? (
-          <p className="text-center text-gray-500">Aucun film pour le moment.</p>
+          <p className="text-center text-gray-500">Chargement des films...</p>
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
             {movies.map((movie) => (
               <div
                 key={movie.imdbID}
-                className="relative border border-gray-300 rounded-lg overflow-hidden w-40 text-center shadow"
+                className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow"
               >
                 {movie.Poster && movie.Poster !== "N/A" ? (
                   <img
@@ -199,7 +199,7 @@ export default function SearchMovies() {
                 {/* Bouton Supprimer en haut à gauche */}
                 <button
                   onClick={() => handleDeleteMovie(movie)}
-                  className="group absolute top-1 left-1 bg-red-500 text-white text-xs px-2 py-1 rounded transition-colors hover:bg-red-600"
+                  className="group absolute top-1 left-1 bg-red-500 opacity-30 text-white text-xs px-2 py-1 rounded transition-all hover:bg-red-600 hover:opacity-100"
                 >
                   <span className="block">
                     <img src="/trash.svg" alt="Supprimer" className="w-4 h-4" />
@@ -211,7 +211,7 @@ export default function SearchMovies() {
                   href={`https://www.imdb.com/title/${movie.imdbID}/`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group absolute top-1 right-1 bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded transition-colors hover:bg-gray-200"
+                  className="group absolute top-1 right-1 bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded transition-all hover:bg-gray-200 opacity-30 hover:opacity-100"
                 >
                   <span className="block">
                     <img src="/link.svg" alt="Voir plus" className="w-4 h-4" />
