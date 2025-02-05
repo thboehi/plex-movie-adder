@@ -4,6 +4,8 @@
 import { useState, useEffect } from "react";
 
 const DELETE_PASSWORD = process.env.NEXT_PUBLIC_DELETE_PASSWORD;
+// Ouiiii je sais qu'un dev va pouvoir trouver ce mot de passe... Et je sais que c'est risqué.. Mais les gars c'est un site entre pote non detcheu. Celui qui s'embête à venir nous enquiquiner avec ça... je le plains sincèrement et je suis désolé pour lui que sa mère ne l'ait pas assez aimée. Zbeub
+const YGG_DOMAIN = process.env.NEXT_PUBLIC_YGG_DOMAIN;
 
 export default function SearchMovies() {
   const [query, setQuery] = useState("");
@@ -199,7 +201,7 @@ export default function SearchMovies() {
                 {/* Bouton Supprimer en haut à gauche */}
                 <button
                   onClick={() => handleDeleteMovie(movie)}
-                  className="group absolute top-1 left-1 bg-red-500 opacity-30 text-white text-xs px-2 py-1 rounded transition-all hover:bg-red-600 hover:opacity-100"
+                  className="group absolute top-1 left-1 bg-red-500 opacity-10 text-white text-xs px-2 py-1 rounded transition-all hover:bg-red-600 hover:opacity-100"
                 >
                   <span className="block">
                     <img src="/trash.svg" alt="Supprimer" className="w-4 h-4" />
@@ -211,10 +213,22 @@ export default function SearchMovies() {
                   href={`https://www.imdb.com/title/${movie.imdbID}/`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group absolute top-1 right-1 bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded transition-all hover:bg-gray-200 opacity-30 hover:opacity-100"
+                  className="group absolute top-1 right-1 bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded transition-all hover:bg-gray-200 opacity-10 hover:opacity-100"
                 >
                   <span className="block">
                     <img src="/link.svg" alt="Voir plus" className="w-4 h-4" />
+                  </span>
+                </a>
+
+                {/* Bouton Recherche en bas à gauche */}
+                <a
+                  href={`${YGG_DOMAIN}engine/search?name=${encodeURIComponent(movie.Title)}&do=search&order=desc&sort=publish_date`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group absolute top-48 left-1 bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded transition-all hover:bg-gray-200 opacity-10 hover:opacity-100"
+                >
+                  <span>
+                    <img src="/search.svg" alt="Recherche" className="w-4 h-4" />
                   </span>
                 </a>
               </div>
