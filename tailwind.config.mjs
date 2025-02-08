@@ -12,6 +12,7 @@ export default {
         foreground: "var(--foreground)",
         "neon-blue": "#5450FF",
         "ygg-blue": "#68dec0",
+        "imdb-yellow": "#F5C517",
       },
     },
   },

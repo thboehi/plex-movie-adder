@@ -208,7 +208,7 @@ export default function SearchMovies() {
                 {/* Bouton Supprimer en haut à gauche */}
                 <button
                   onClick={() => handleDeleteMovie(movie)}
-                  className="group absolute top-1 left-1 bg-red-500 opacity-10 text-white text-xs px-2 py-1 rounded transition-all hover:bg-red-600 hover:opacity-100"
+                  className="group absolute top-2 -right-2 hover:right-0 bg-red-500 opacity-10 text-white text-xs p-2 rounded-l transition-all hover:bg-red-600 hover:opacity-100"
                 >
                   <span className="block">
                     <img src="/trash.svg" alt="Supprimer" className="w-4 h-4" />
@@ -220,11 +220,12 @@ export default function SearchMovies() {
                   href={`https://www.imdb.com/title/${movie.imdbID}/`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group absolute top-1 right-1 bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded transition-all hover:bg-gray-200 opacity-10 hover:opacity-100"
+                  className="group absolute top-2 -left-2 hover:left-0 bg-imdb-yellow text-gray-700 text-xs p-2 rounded-r transition-all opacity-10 hover:opacity-100"
                 >
-                  <span className="block">
+                  <span className="block group-hover:hidden">
                     <img src="/link.svg" alt="Voir plus" className="w-4 h-4" />
                   </span>
+                  <span className="hidden group-hover:block" style={{fontSize: 10, fontWeight: 900}}>IMDb</span>
                 </a>
 
                 {/* Bouton Recherche en bas à gauche */}
@@ -242,7 +243,7 @@ export default function SearchMovies() {
                       )}${sortParam}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group absolute top-48 left-1 bg-ygg-blue text-gray-700 text-xs px-2 py-1 rounded transition-all opacity-10 hover:opacity-100"
+                      className="group absolute top-12 -left-2 hover:left-0 bg-ygg-blue text-gray-700 text-xs p-2 rounded-r transition-all opacity-30 hover:opacity-100"
                     >
                       <span className="block group-hover:hidden">
                         <img src="/search.svg" alt="Recherche" className="w-4 h-4" />
