@@ -11,6 +11,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         "neon-blue": "#5450FF",
+        "neon-blue-darker": "#4340cc",
         "ygg-blue": "#68dec0",
         "imdb-yellow": "#F5C517",
       },

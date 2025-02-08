@@ -1,34 +1,34 @@
-// app/page.js
+// app/components/LoginForm.js
 "use client";
 
-import { useState, useEffect } from "react";
-import LoginForm from "./components/LoginForm";
-import SearchMovies from "./components/SearchMovies";
+import { useState } from "react";
 
-export default function Home() {
-  const [authenticated, setAuthenticated] = useState(false);
+export default function LoginForm({ onSuccess }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    // Vérifie l'authentification en appelant l'API dédiée
-    async function checkAuth() {
-      try {
-        const res = await fetch("/api/check-auth");
-        const data = await res.json();
-        setAuthenticated(data.authenticated);
-      } catch (error) {
-        console.error("Erreur lors de la vérification de l'authentification", error);
-        setAuthenticated(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        onSuccess();
+      } else {
+        setError("Mot de passe incorrect");
       }
+    } catch (err) {
+      console.error("Erreur lors de l'authentification", err);
+      setError("Erreur lors de l'authentification");
     }
-    checkAuth();
-  }, []);
-
-  if (!authenticated) {
-    return <LoginForm onSuccess={() => setAuthenticated(true)} />;
-  }
+  };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
       <header className="flex flex-col items-center mb-12">
         {/* Logo SVG de Plex */}
         <div className="w-40 mb-1">
@@ -144,22 +144,22 @@ export default function Home() {
           Movie Adder
         </h1>
       </header>
-      
-      {/* Section Information */}
-      <details className="max-w-xl bg-white border border-gray-200 dark:bg-gray-950 dark:border-gray-800 p-4 rounded-md mb-8 text-sm">
-        <summary className="cursor-pointer font-semibold text-gray-700 dark:text-gray-50">
-          Informations
-        </summary>
-        <p className="text-gray-600 dark:text-gray-50">
-          Notez que les films venant de sortir au cinéma prennent souvent <strong>quelques mois avant d'être disponibles</strong> en VOD.
-        </p>
-        <p className="text-gray-600 dark:text-gray-50 text-xs pt-7">
-          Ceci est un site de test, aucun piratage de film n'a été ou ne sera réalisé. Cet outil permet simplement de tester le contacte d'une API de librairie de films en utilisant le framework NextJS. Il fait partie d'un exercice réalisé pour une école de Web Developement.
-        </p>
-      </details>
-      
-      {/* Contenu principal */}
-      <SearchMovies />
-    </main>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <input
+          type="password"
+          placeholder="Mot de passe"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 transition-colors"
+        />
+        <button
+          type="submit"
+          className="bg-neon-blue hover:bg-neon-blue-darker transition-colors text-white px-4 py-2 rounded-md"
+        >
+          Se connecter
+        </button>
+        {error && <p className="text-red-500 text-center text-xs font-bold">{error}</p>}
+      </form>
+    </div>
   );
 }
