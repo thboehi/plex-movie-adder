@@ -228,16 +228,29 @@ export default function SearchMovies() {
                 </a>
 
                 {/* Bouton Recherche en bas à gauche */}
-                <a
-                  href={`${YGG_DOMAIN}engine/search?name=${encodeURIComponent(movie.Title)}&do=search&order=desc&sort=publish_date`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group absolute top-48 left-1 bg-white border border-gray-300 text-gray-700 text-xs px-2 py-1 rounded transition-all hover:bg-gray-200 opacity-10 hover:opacity-100"
-                >
-                  <span>
-                    <img src="/search.svg" alt="Recherche" className="w-4 h-4" />
-                  </span>
-                </a>
+                {(() => {
+                  const currentYear = new Date().getFullYear();
+                  const movieYear = parseInt(movie.Year, 10);
+                  const sortParam =
+                    movieYear >= currentYear - 1
+                      ? "&do=search&order=desc&sort=publish_date"
+                      : "&do=search&order=desc&sort=completed";
+                  return (
+                    <a
+                      href={`${YGG_DOMAIN}engine/search?name=${encodeURIComponent(
+                        movie.Title
+                      )}${sortParam}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group absolute top-48 left-1 bg-ygg-blue text-gray-700 text-xs px-2 py-1 rounded transition-all opacity-10 hover:opacity-100"
+                    >
+                      <span className="block group-hover:hidden">
+                        <img src="/search.svg" alt="Recherche" className="w-4 h-4" />
+                      </span>
+                      <span className="hidden group-hover:block" style={{fontSize: 10, fontWeight: 700}}>YGG</span>
+                    </a>
+                  );
+                })()}
               </div>
             ))}
           </div>

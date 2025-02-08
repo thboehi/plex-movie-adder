@@ -11,6 +11,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         "neon-blue": "#5450FF",
+        "ygg-blue": "#68dec0",
       },
     },
   },
