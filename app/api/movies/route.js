@@ -42,7 +42,7 @@ export async function GET() {
     // On ne retourne que les films dont le champ "deleted" n'est pas true
     const movies = await db
       .collection("movies")
-      .find({ deleted: { $ne: true } })
+      .find({ deleted: false })
       .toArray();
     return NextResponse.json(movies);
   } catch (error) {
@@ -60,6 +60,7 @@ export async function POST(request) {
     const movie = await request.json();
     const ip = getIp(request);
     const { db } = await connectToDatabase();
+    const added_date = new Date();
 
     // Vérifier si le film existe déjà
     const existingMovie = await db
@@ -84,6 +85,8 @@ export async function POST(request) {
               added_by: ip,
               // On peut aussi effacer le champ deleted_by si présent
               deleted_by: null,
+              deleted_date: null,
+              added_date,
             },
           }
         );
@@ -98,7 +101,9 @@ export async function POST(request) {
     const movieToInsert = {
       ...movie,
       added_by: ip,
+      added_date,
       deleted: false,
+      deleted_date: null,
     };
 
     await db.collection("movies").insertOne(movieToInsert);
@@ -125,11 +130,12 @@ export async function DELETE(request) {
       );
     }
     const ip = getIp(request);
+    const deleted_date = new Date();
     const { db } = await connectToDatabase();
     // Au lieu de supprimer, on met à jour le document pour le marquer comme supprimé
     const result = await db.collection("movies").updateOne(
       { imdbID },
-      { $set: { deleted: true, deleted_by: ip } }
+      { $set: { deleted: true, deleted_by: ip, deleted_date } }
     );
     if (result.modifiedCount === 0) {
       return NextResponse.json(

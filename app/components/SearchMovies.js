@@ -175,7 +175,7 @@ export default function SearchMovies() {
       {/* Section des films ajoutés */}
       <div className="w-full">
         <h2 className="text-2xl font-semibold mb-4 text-center">
-          Films dans la liste d'attente
+          Films et séries dans la liste d'attente
         </h2>
         {loadingMovies ? (
           <div className="flex justify-center items-center">

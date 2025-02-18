@@ -4,6 +4,8 @@
 import { useState, useEffect } from "react";
 import LoginForm from "./components/LoginForm";
 import SearchMovies from "./components/SearchMovies";
+import DeletedMovies from "./components/DeletedMovies";
+import DecryptedText from './components/DecryptedText';
 
 export default function Home() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -160,6 +162,20 @@ export default function Home() {
       
       {/* Contenu principal */}
       <SearchMovies />
+      <DeletedMovies />
+      <div className="p-10 pt-20 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
+        <p className="text-gray-400 dark:text-gray-700">Site web créé et maintenu par{" "}
+          <a className="group text-neon-blue font-bold transition-all hover:underline" href="https://thbo.ch" target="_blank">
+            <DecryptedText
+              text="thbo.ch"
+              speed={80}
+              maxIterations={10}
+              className="group-hover:underline"
+             />
+          </a>
+        </p>
+      </div>
+      
     </main>
   );
 }
