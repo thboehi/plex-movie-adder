@@ -28,6 +28,11 @@ export default function Home() {
     checkAuth();
   }, []);
 
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.replace("/"); // Recharge la page proprement
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
@@ -172,6 +177,13 @@ export default function Home() {
         <p className="text-gray-600 dark:text-gray-50 text-xs pt-7">
           Ceci est un site de test, aucun piratage de film n'a été ou ne sera réalisé. Cet outil permet simplement de tester le contacte d'une API de librairie de films en utilisant le framework NextJS. Il fait partie d'un exercice réalisé pour une école de Web Developement.
         </p>
+        {/* Un bouton pour se déconneter, donc en réinitialisant le cookie authToken et en rechargeant la page */}
+        <button
+          onClick={handleLogout}
+          className="mt-4 p-2 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
+        >
+          Se déconnecter
+        </button>
       </details>
       
       {/* Contenu principal */}
