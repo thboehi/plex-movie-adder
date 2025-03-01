@@ -30,7 +30,7 @@ export default function SearchMovies() {
       } catch (error) {
         console.error("Erreur lors du chargement des films :", error);
       }
-      setLoadingMovies(false);
+      setLoadingMovies(false); // Retiré le commentaire pour éviter le chargement infini
     };
   
     fetchMovies();
@@ -119,7 +119,7 @@ export default function SearchMovies() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-2 flex flex-col items-center">
+    <div className="mx-auto flex flex-col items-center">
       {/* Barre de recherche */}
       <input
         type="text"
@@ -178,8 +178,15 @@ export default function SearchMovies() {
           Films et séries dans la liste d'attente
         </h2>
         {loadingMovies ? (
-          <div className="flex justify-center items-center">
-            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="flex flex-wrap gap-6 justify-center">
+            {[...Array(4)].map((_, index) => (
+              <div
+                key={index}
+                className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 h-64 text-center shadow bg-gray-200 dark:bg-gray-700"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+              </div>
+            ))}
           </div>
         ) : movies.length === 0 ? (
           <p className="text-center text-gray-500">Aucun film dans la liste d'attente</p>

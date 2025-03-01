@@ -6,8 +6,10 @@ import { useState } from "react";
 export default function LoginForm({ onSuccess }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
 
   const handleSubmit = async (e) => {
+    setLoggingIn(true);
     e.preventDefault();
     try {
       const res = await fetch("/api/auth", {
@@ -18,12 +20,15 @@ export default function LoginForm({ onSuccess }) {
       const data = await res.json();
       if (res.ok && data.success) {
         onSuccess();
+        setLoggingIn(false);
       } else {
         setError("Mot de passe incorrect");
+        setLoggingIn(false);
       }
     } catch (err) {
       console.error("Erreur lors de l'authentification", err);
       setError("Erreur lors de l'authentification");
+      setLoggingIn(false);
     }
   };
 

@@ -30,7 +30,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-4 lg:p-8">
       <header className="flex flex-col items-center mb-12">
         {/* Logo SVG de Plex */}
         <div className="w-40 mb-1">

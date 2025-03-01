@@ -25,6 +25,7 @@ export default function DeletedMovies() {
       } catch (error) {
         console.error("Erreur lors du chargement des films ajoutés :", error);
       }
+      // On simule un chargement long pour voir l'animation de chargement
       setLoadingMovies(false);
     };
 
@@ -37,9 +38,17 @@ export default function DeletedMovies() {
         Films et séries ajoutés récemment sur Plex
       </h2>
       {loadingMovies ? (
-        <div className="flex justify-center items-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
+        <div className="flex flex-wrap gap-2 justify-center">
+        {[...Array(4)].map((_, index) => (
+          <div
+            key={index}
+            className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-24 h-40 text-center shadow bg-gray-200 dark:bg-gray-700"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+          </div>
+        ))}
+      </div>
+        
       ) : movies.length === 0 ? (
         <p className="text-center text-gray-500">
           Aucun film n'a encore été ajouté sur Plex.
