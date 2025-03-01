@@ -9,6 +9,7 @@ import DecryptedText from './components/DecryptedText';
 
 export default function Home() {
   const [authenticated, setAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Vérifie l'authentification en appelant l'API dédiée
@@ -17,16 +18,18 @@ export default function Home() {
         const res = await fetch("/api/check-auth");
         const data = await res.json();
         setAuthenticated(data.authenticated);
+        setLoading(false);
       } catch (error) {
         console.error("Erreur lors de la vérification de l'authentification", error);
         setAuthenticated(false);
+        setLoading(false);
       }
     }
     checkAuth();
   }, []);
 
   if (!authenticated) {
-    return <LoginForm onSuccess={() => setAuthenticated(true)} />;
+    return <LoginForm onSuccess={() => setAuthenticated(true)} loading />;
   }
 
   return (

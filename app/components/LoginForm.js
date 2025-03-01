@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 
-export default function LoginForm({ onSuccess }) {
+export default function LoginForm({ onSuccess, loading }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
@@ -31,6 +31,15 @@ export default function LoginForm({ onSuccess }) {
       setLoggingIn(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        {/* Demi rond stylisé qui tourne */}
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
 
@@ -150,6 +159,7 @@ export default function LoginForm({ onSuccess }) {
           Movie Adder
         </h1>
       </header>
+
       {loggingIn ? (
         <div className="flex justify-center items-center">
         {/* Demi rond stylisé qui tourne */}
