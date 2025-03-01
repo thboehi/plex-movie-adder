@@ -28,8 +28,19 @@ export default function Home() {
     checkAuth();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
+        <div className="flex justify-center items-center">
+          {/* Demi rond stylisé qui tourne */}
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
   if (!authenticated) {
-    return <LoginForm onSuccess={() => setAuthenticated(true)} loading />;
+    return <LoginForm onSuccess={() => setAuthenticated(true)} />;
   }
 
   return (
