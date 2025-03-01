@@ -33,6 +33,7 @@ export default function LoginForm({ onSuccess }) {
   };
 
   return (
+
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
       <header className="flex flex-col items-center mb-12">
         {/* Logo SVG de Plex */}
@@ -149,7 +150,14 @@ export default function LoginForm({ onSuccess }) {
           Movie Adder
         </h1>
       </header>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      {loggingIn ? (
+        <div className="flex justify-center items-center">
+        {/* Demi rond stylisé qui tourne */}
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      ) : (
+        <>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <input
           type="password"
           placeholder="Mot de passe"
@@ -165,6 +173,9 @@ export default function LoginForm({ onSuccess }) {
         </button>
         {error && <p className="text-red-500 text-center text-xs font-bold">{error}</p>}
       </form>
+      </>
+      )}
+      
     </div>
   );
 }
