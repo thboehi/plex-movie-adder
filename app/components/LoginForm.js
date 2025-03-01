@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import SplashCursor from "./SplashCursor";
 
 export default function LoginForm({ onSuccess }) {
   const [password, setPassword] = useState("");
@@ -33,8 +34,8 @@ export default function LoginForm({ onSuccess }) {
   };
 
   return (
-
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
+  <>
+    <div className="z-50 min-h-svh w-full overscroll-none overflow-hidden fixed flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
       <header className="flex flex-col items-center mb-12">
         {/* Logo SVG de Plex */}
         <div className="w-40 mb-1">
@@ -164,7 +165,7 @@ export default function LoginForm({ onSuccess }) {
           placeholder="Mot de passe"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 transition-colors"
+          className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md outline-none focus:border-blue-300 focus:ring-2 hover:border-blue-300 hover:dark:border-blue-900 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 transition-colors"
         />
         <button
           type="submit"
@@ -178,5 +179,7 @@ export default function LoginForm({ onSuccess }) {
       )}
       
     </div>
+    <SplashCursor />
+    </>
   );
 }
