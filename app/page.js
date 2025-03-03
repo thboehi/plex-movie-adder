@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from "react";
 import LoginForm from "./components/LoginForm";
-import SearchMovies from "./components/SearchMovies";
-import DeletedMovies from "./components/DeletedMovies";
+import ListMovies from "./components/ListMovies";
+import AddedMovies from "./components/AddedMovies";
 import DecryptedText from './components/DecryptedText';
 
 export default function Home() {
@@ -167,7 +167,7 @@ export default function Home() {
       </header>
       
       {/* Section Information */}
-      <details className="max-w-xl bg-white border border-gray-200 dark:bg-gray-950 dark:border-gray-800 p-4 rounded-md mb-8 text-sm">
+      <details className="max-w-xl bg-white border border-gray-200 hover:border-blue-300 hover:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 p-4 rounded-md mb-8 text-sm transition-colors">
         <summary className="cursor-pointer font-semibold text-gray-700 dark:text-gray-50">
           Informations
         </summary>
@@ -187,9 +187,9 @@ export default function Home() {
       </details>
       
       {/* Contenu principal */}
-      <SearchMovies />
-      <DeletedMovies />
-      <div className="p-10 pt-20 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
+      <ListMovies />
+      <AddedMovies />
+      <div className="m-20 p-10 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
         <p className="text-gray-400 dark:text-gray-700">Site web créé et maintenu par{" "}
           <a className="group text-neon-blue font-bold transition-all hover:underline" href="https://thbo.ch" target="_blank">
             <DecryptedText

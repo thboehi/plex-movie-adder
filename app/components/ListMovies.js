@@ -7,12 +7,13 @@ const DELETE_PASSWORD = process.env.NEXT_PUBLIC_DELETE_PASSWORD;
 // Ouiiii je sais qu'un dev va pouvoir trouver ce mot de passe... Et je sais que c'est risqué.. Mais les gars c'est un site entre pote non detcheu. Celui qui s'embête à venir nous enquiquiner avec ça... je le plains sincèrement et je suis désolé pour lui que sa mère ne l'ait pas assez aimée. Zbeub
 const YGG_DOMAIN = process.env.NEXT_PUBLIC_YGG_DOMAIN;
 
-export default function SearchMovies() {
+export default function ListMovies() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [movies, setMovies] = useState([]);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [addingMovie, setAddingMovie] = useState(false);
   const [authorized, setAuthorized] = useState(false);
 
   // Chargement des films persistés au montage
@@ -30,7 +31,7 @@ export default function SearchMovies() {
       } catch (error) {
         console.error("Erreur lors du chargement des films :", error);
       }
-      setLoadingMovies(false); // Retiré le commentaire pour éviter le chargement infini
+      setLoadingMovies(false);
     };
   
     fetchMovies();
@@ -68,6 +69,7 @@ export default function SearchMovies() {
   const handleAddMovie = async (movie) => {
     // Si le film n'est pas déjà présent
     if (!movies.some((m) => m.imdbID === movie.imdbID)) {
+      setAddingMovie(true); // Active l'overlay de chargement
       try {
         const response = await fetch("/api/movies", {
           method: "POST",
@@ -84,6 +86,7 @@ export default function SearchMovies() {
         console.error("Erreur lors de l'enregistrement du film :", error);
       }
     }
+    setAddingMovie(false); // Désactive l'overlay une fois terminé
     // Réinitialise la recherche et les résultats
     setQuery("");
     setResults([]);
@@ -119,6 +122,7 @@ export default function SearchMovies() {
   };
 
   return (
+    <>
     <div className="mx-auto flex flex-col items-center">
       {/* Barre de recherche */}
       <input
@@ -126,7 +130,7 @@ export default function SearchMovies() {
         placeholder="Rechercher un film..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md mb-8 focus:outline-none focus:ring focus:border-blue-300 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800"
+        className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md mb-8 outline-none focus:border-blue-300 focus:ring-2 hover:border-blue-300 hover:dark:border-blue-900 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 transition-colors"
       />
 
       {/* Section des résultats de recherche */}
@@ -195,7 +199,7 @@ export default function SearchMovies() {
             {movies.map((movie) => (
               <div
                 key={movie.imdbID}
-                className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow"
+                className="relative border border-gray-300 dark:border-gray-800 hover:border-blue-300 hover:dark:border-blue-900 rounded-lg overflow-hidden w-40 text-center shadow transition-all hover:scale-105"
               >
                 {movie.Poster && movie.Poster !== "N/A" ? (
                   <img
@@ -265,5 +269,11 @@ export default function SearchMovies() {
         )}
       </div>
     </div>
+    {addingMovie && (
+      <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
+        <div className="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>
+      </div>
+    )}
+    </>
   );
 }

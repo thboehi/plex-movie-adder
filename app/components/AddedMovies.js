@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 import { formatDistance } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export default function DeletedMovies() {
-  const [movies, setMovies] = useState([]);
+export default function AddedMovies() {
+  const [addedMovies, setAddedMovies] = useState([]);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [visibleCount, setVisibleCount] = useState(5);
 
@@ -18,7 +18,7 @@ export default function DeletedMovies() {
         if (response.ok) {
           const data = await response.json();
           const sortedData = data.sort((a, b) => new Date(b.deleted_date) - new Date(a.deleted_date));
-          setMovies(sortedData);
+          setAddedMovies(sortedData);
         } else {
           console.error("Erreur lors du chargement des films ajoutés");
         }
@@ -49,22 +49,22 @@ export default function DeletedMovies() {
         ))}
       </div>
         
-      ) : movies.length === 0 ? (
+      ) : addedMovies.length === 0 ? (
         <p className="text-center text-gray-500">
           Aucun film n'a encore été ajouté sur Plex.
         </p>
       ) : (
         <div className="flex flex-wrap gap-2 justify-center">
-          {movies.slice(0, visibleCount).map((movie) => (
+          {addedMovies.slice(0, visibleCount).map((movie) => (
             <div
               key={movie.imdbID}
-              className="group border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-24 text-center shadow hover:scale-105 transition-transform"
+              className="group border border-gray-300 dark:border-gray-800 hover:border-blue-300 hover:dark:border-blue-900 rounded-lg overflow-hidden w-24 text-center shadow hover:scale-105 transition-transform"
             >
               {movie.Poster && movie.Poster !== "N/A" ? (
                 <img
                   src={movie.Poster}
                   alt={movie.Title}
-                  className="w-full h-36 object-cover opacity-50 group-hover:opacity-100 transition-opacity"
+                  className="group w-full h-36 object-cover opacity-50 group-hover:opacity-100 transition-opacity"
                 />
               ) : (
                 <div className="w-full h-36 bg-gray-200 flex items-center justify-center">
@@ -72,36 +72,39 @@ export default function DeletedMovies() {
                 </div>
               )}
               <div className="p-1">
-                <p className="text-xs text-gray-500 py-2">
+                
+                <h3 className="text-xs font-semibold">{movie.Title}</h3>
+                <p className="text-xs text-gray-500">{movie.Year}</p>
+                
+                <p className="text-xs text-gray-500 py-2 opacity-30 group-hover:opacity-100 transition-opacity">
                     Ajouté{" "}
                     {formatDistance(new Date(movie.deleted_date), new Date(), {
                       addSuffix: true,
                       locale: fr,
                     })}
                 </p>
-                <h3 className="text-xs font-semibold">{movie.Title}</h3>
-                <p className="text-xs text-gray-500">{movie.Year}</p>
                 
               </div>
             </div>
           ))}
           
-          {movies.length > visibleCount ? (
+          {addedMovies.length > visibleCount ? (
   <button
     onClick={() =>
-      setVisibleCount((prev) => Math.min(prev + 10, movies.length))
+      setVisibleCount((prev) => Math.min(prev + 5, addedMovies.length))
     }
-    className="p-6 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
+    className="p-6 min-h-52 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
   >
-    Afficher<br />plus
+    Voir plus<br/>
+    {visibleCount} / {addedMovies.length}
   </button>
 ) : (
-  movies.length > 5 && (
+  addedMovies.length > 5 && (
     <button
       onClick={() => setVisibleCount(5)}
-      className="p-6 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
+      className="p-6 min-h-52 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
     >
-      Cacher
+      Réduire
     </button>
   )
 )}
