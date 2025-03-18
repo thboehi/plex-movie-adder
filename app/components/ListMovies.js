@@ -1,4 +1,4 @@
-// app/components/SearchMovies.js
+// app/components/ListMovies.js
 "use client";
 
 import { useState, useEffect } from "react";
