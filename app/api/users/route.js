@@ -36,6 +36,7 @@ function getIp(request) {
   }
 
 export async function GET(req, res) {
+
   try {
     const { db } = await connectToDatabase();
     const users = await db.collection("users").find({}).toArray();
