@@ -10,7 +10,7 @@ export default function Hero({ adminAuthenticated, subtitle }) {
 
   return (
     <>
-        <header className="flex flex-col items-center m-8">
+        <header className="flex flex-col items-center m-16">
         {/* Logo SVG de Plex */}
         <div className="w-40 mb-1">
 
@@ -132,7 +132,7 @@ export default function Hero({ adminAuthenticated, subtitle }) {
       </header>
       
       {/* Section Information */}
-      <details className="max-w-xl bg-white border border-gray-200 hover:border-blue-300 hover:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 p-4 rounded-md mb-8 text-sm transition-colors">
+      <details className="max-w-xl bg-white border border-gray-200 hover:border-blue-300 hover:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 p-4 rounded-md mb-16 text-sm transition-colors">
         <summary className="cursor-pointer font-semibold text-gray-700 dark:text-gray-50">
           Informations
         </summary>
