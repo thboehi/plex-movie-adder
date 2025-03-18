@@ -40,7 +40,6 @@ export default function Home() {
   };
 
   const handleLoginSuccess = (role) => {
-    console.log("Authentification réussie en tant que " + role);
     if (role === "admin") {
       setAuthenticated(true);
       setAdminAuthenticated(true);

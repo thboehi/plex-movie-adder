@@ -32,9 +32,7 @@ export default function LoginForm({ onSuccess }) {
   const handleSubmit = async (e) => {
     setLoggingIn(true);
     e.preventDefault();
-    console.log(adminLogin + " " + password);
     
-
     if (adminLogin) {
       // Authentification pour les utilisateurs admin
       try {
