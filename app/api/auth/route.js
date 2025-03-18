@@ -65,9 +65,9 @@ export async function POST(request) {
   if (loginSuccessful) {
     // Création du token JWT qui expire dans 7 jours
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const token = await new SignJWT({ authenticated: true })
+    const token = await new SignJWT({ authenticated: true, adminAuthenticated: false })
       .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("7d")
+      .setExpirationTime("30d")
       .sign(secret);
 
     const response = NextResponse.json({ success: true });
