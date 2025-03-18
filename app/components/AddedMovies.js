@@ -7,12 +7,12 @@ import { fr } from "date-fns/locale";
 
 export default function AddedMovies() {
   const [addedMovies, setAddedMovies] = useState([]);
-  const [loadingMovies, setLoadingMovies] = useState(true);
+  const [loadingAddedMovies, setLoadingAddedMovies] = useState(true);
   const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
     const fetchAddedMovies = async () => {
-      setLoadingMovies(true);
+      setLoadingAddedMovies(true);
       try {
         const response = await fetch("/api/movies/deleted");
         if (response.ok) {
@@ -26,7 +26,7 @@ export default function AddedMovies() {
         console.error("Erreur lors du chargement des films ajoutés :", error);
       }
       // On simule un chargement long pour voir l'animation de chargement
-      setLoadingMovies(false);
+      setLoadingAddedMovies(false);
     };
 
     fetchAddedMovies();
@@ -37,7 +37,7 @@ export default function AddedMovies() {
       <h2 className="text-2xl font-semibold mb-4 text-center">
         Films et séries ajoutés récemment sur Plex
       </h2>
-      {loadingMovies ? (
+      {loadingAddedMovies ? (
         <div className="flex flex-wrap gap-2 justify-center">
         {[...Array(4)].map((_, index) => (
           <div

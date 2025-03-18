@@ -5,33 +5,81 @@ import { useMemo, useState } from "react";
 import SplashCursor from "./SplashCursor";
 
 export default function LoginForm({ onSuccess }) {
+
+  
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
+
+  // Récupérer le cookie lastLoginAs
+  // Récupérer les cookies et les transformer en objet
+  const cookies = document.cookie
+  .split("; ") // Séparer chaque cookie
+  .map((cookie) => cookie.split("=")) // Séparer clé et valeur
+  .reduce((accumulator, [key, value]) => {
+    accumulator[key] = decodeURIComponent(value); // Décoder la valeur
+    return accumulator;
+  }, {}); 
+
+  // Récupérer la valeur du cookie "lastLoginAs"
+  const lastLoginAs = cookies.lastLoginAs || null;
+
+  const [adminLogin, setAdminLogin] = useState(lastLoginAs ? lastLoginAs === "admin" : false);
+
+
   const MemoizedSplashCursor = useMemo(() => <SplashCursor />, []);
 
   const handleSubmit = async (e) => {
     setLoggingIn(true);
     e.preventDefault();
-    try {
-      const res = await fetch("/api/auth", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        onSuccess();
-        setLoggingIn(false);
-      } else {
-        setError("Mot de passe incorrect");
+    console.log(adminLogin + " " + password);
+    
+
+    if (adminLogin) {
+      // Authentification pour les utilisateurs admin
+      try {
+        const res = await fetch("/api/auth/admin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          onSuccess("admin");
+          setLoggingIn(false);
+        } else {
+          setError("Mot de passe administrateur incorrect");
+          setLoggingIn(false);
+        }
+      } catch (err) {
+        console.error("Erreur lors de l'authentification administrateur", err);
+        setError("Erreur lors de l'authentification administrateur");
         setLoggingIn(false);
       }
-    } catch (err) {
-      console.error("Erreur lors de l'authentification", err);
-      setError("Erreur lors de l'authentification");
-      setLoggingIn(false);
+    } else {
+      // Appel de l'API d'authentification pour les utilisateurs normaux
+      try {
+        const res = await fetch("/api/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          onSuccess("user");
+          setLoggingIn(false);
+        } else {
+          setError("Mot de passe incorrect");
+          setLoggingIn(false);
+        }
+      } catch (err) {
+        console.error("Erreur lors de l'authentification", err);
+        setError("Erreur lors de l'authentification");
+        setLoggingIn(false);
+      }
     }
+    
+    
   };
 
   return (
@@ -169,6 +217,18 @@ export default function LoginForm({ onSuccess }) {
               onChange={(e) => setPassword(e.target.value)}
               className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md outline-none focus:border-blue-300 focus:ring-2 hover:border-blue-300 hover:dark:border-blue-900 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 transition-colors"
             />
+            {/* Ajouter un toggle switch pour activer la connexion admin */}
+            <div className="flex items-center me-4">
+              <input
+                id="adminLogin"
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-blue-600"
+                checked={adminLogin}
+                onChange={() => setAdminLogin(!adminLogin)}
+              />
+              <label htmlFor="adminLogin" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Connexion admin</label>
+              {/* <span className="text-sm text-gray-700 dark:text-gray-50">Connexion admin</span> */}
+            </div>
             <button
               type="submit"
               className="bg-neon-blue hover:bg-neon-blue-darker transition-colors text-white px-4 py-2 rounded-md"

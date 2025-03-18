@@ -1,4 +1,4 @@
-// app/api/auth/route.js
+// app/api/auth/admin/route.js
 import { NextResponse } from "next/server";
 import { SignJWT } from "jose";
 import { MongoClient } from "mongodb";
@@ -43,7 +43,7 @@ export async function POST(request) {
   const ip = getIp(request);
   const userAgent = request.headers.get("user-agent") || "unknown";
   const timestamp = new Date();
-  const loginSuccessful = password === process.env.ACCESS_PASSWORD;
+  const loginSuccessful = password === process.env.ADMIN_ACCESS_PASSWORD;
 
   // Enregistrement de la tentative de connexion dans la collection d'audit,
   // en enregistrant le mot de passe tenté et le résultat (success)
@@ -64,7 +64,7 @@ export async function POST(request) {
 
   if (loginSuccessful) {
     // Création du token JWT qui expire dans 7 jours
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const secret = new TextEncoder().encode(process.env.JWT_ADMIN_SECRET);
     const token = await new SignJWT({ authenticated: true })
       .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("7d")
@@ -77,7 +77,7 @@ export async function POST(request) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 jours
     });
-    response.cookies.set("lastLoginAs", "user", {
+    response.cookies.set("lastLoginAs", "admin", {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       path: "/",

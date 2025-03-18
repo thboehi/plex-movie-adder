@@ -6,18 +6,24 @@ import LoginForm from "./components/LoginForm";
 import ListMovies from "./components/ListMovies";
 import AddedMovies from "./components/AddedMovies";
 import DecryptedText from './components/DecryptedText';
+import { set } from "date-fns";
 
 export default function Home() {
+
   const [authenticated, setAuthenticated] = useState(false);
+  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Vérifie l'authentification en appelant l'API dédiée
+
     async function checkAuth() {
       try {
         const res = await fetch("/api/check-auth");
         const data = await res.json();
         setAuthenticated(data.authenticated);
+        setAdminAuthenticated(data.adminAuthenticated);
         setLoading(false);
       } catch (error) {
         console.error("Erreur lors de la vérification de l'authentification", error);
@@ -33,6 +39,17 @@ export default function Home() {
     window.location.replace("/"); // Recharge la page proprement
   };
 
+  const handleLoginSuccess = (role) => {
+    console.log("Authentification réussie en tant que " + role);
+    if (role === "admin") {
+      setAuthenticated(true);
+      setAdminAuthenticated(true);
+    } else {
+      setAuthenticated(true);
+      setAdminAuthenticated(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
@@ -45,7 +62,7 @@ export default function Home() {
   }
 
   if (!authenticated) {
-    return <LoginForm onSuccess={() => setAuthenticated(true)} />;
+    return <LoginForm onSuccess={handleLoginSuccess} />;
   }
 
   return (
@@ -164,6 +181,11 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
           Movie Adder
         </h1>
+        {adminAuthenticated && (
+          <p className="text-red-500 dark:text-gray-50 text-sm">
+            ADMIN
+          </p>
+          )}
       </header>
       
       {/* Section Information */}
@@ -177,6 +199,11 @@ export default function Home() {
         <p className="text-gray-600 dark:text-gray-50 text-xs pt-7">
           Ceci est un site de test, aucun piratage de film n'a été ou ne sera réalisé. Cet outil permet simplement de tester le contacte d'une API de librairie de films en utilisant le framework NextJS. Il fait partie d'un exercice réalisé pour une école de Web Developement.
         </p>
+        {adminAuthenticated && (
+          <p className="text-red-500 dark:text-red-500 text-xs pt-7">
+            ⚠️ Vous êtes actuellement connecté en tant qu'administrateur. Ce privilège vient avec de grandes responsabilités. Merci de ne pas abuser de ce pouvoir et de faire attention à ce que vous faites. Sachez que chaque action est loggée et peut être suivie.
+          </p>
+          )}
         {/* Un bouton pour se déconneter, donc en réinitialisant le cookie authToken et en rechargeant la page */}
         <button
           onClick={handleLogout}
@@ -187,7 +214,7 @@ export default function Home() {
       </details>
       
       {/* Contenu principal */}
-      <ListMovies />
+      <ListMovies adminAuthenticated={adminAuthenticated} />
       <AddedMovies />
       <div className="m-20 p-10 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
         <p className="text-gray-400 dark:text-gray-700">Site web créé et maintenu par{" "}

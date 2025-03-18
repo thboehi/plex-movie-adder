@@ -7,31 +7,36 @@ const DELETE_PASSWORD = process.env.NEXT_PUBLIC_DELETE_PASSWORD;
 // Ouiiii je sais qu'un dev va pouvoir trouver ce mot de passe... Et je sais que c'est risqué.. Mais les gars c'est un site entre pote non detcheu. Celui qui s'embête à venir nous enquiquiner avec ça... je le plains sincèrement et je suis désolé pour lui que sa mère ne l'ait pas assez aimée. Zbeub
 const YGG_DOMAIN = process.env.NEXT_PUBLIC_YGG_DOMAIN;
 
-export default function ListMovies() {
+export default function ListMovies( { adminAuthenticated } ) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
-  const [movies, setMovies] = useState([]);
-  const [loadingMovies, setLoadingMovies] = useState(true);
+  const [listMovies, setListMovies] = useState([]);
+  const [loadingListMovies, setLoadingListMovies] = useState(true);
   const [loading, setLoading] = useState(false);
   const [addingMovie, setAddingMovie] = useState(false);
-  const [authorized, setAuthorized] = useState(false);
+
+  // Attendre 3 secondes avant de log dans la console
+  setTimeout(() => {
+    console.log("adminAuthenticated : ", adminAuthenticated);
+  }, 3000);
+  
 
   // Chargement des films persistés au montage
   useEffect(() => {
     const fetchMovies = async () => {
-      setLoadingMovies(true);
+      setLoadingListMovies(true);
       try {
         const response = await fetch("/api/movies");
         if (response.ok) {
           const data = await response.json();
-          setMovies(data);
+          setListMovies(data);
         } else {
           console.error("Erreur lors du chargement des films persistés");
         }
       } catch (error) {
         console.error("Erreur lors du chargement des films :", error);
       }
-      setLoadingMovies(false);
+      setLoadingListMovies(false);
     };
   
     fetchMovies();
@@ -68,7 +73,7 @@ export default function ListMovies() {
   // Mise à jour de handleAddMovie pour persister via l'API
   const handleAddMovie = async (movie) => {
     // Si le film n'est pas déjà présent
-    if (!movies.some((m) => m.imdbID === movie.imdbID)) {
+    if (!listMovies.some((m) => m.imdbID === movie.imdbID)) {
       setAddingMovie(true); // Active l'overlay de chargement
       try {
         const response = await fetch("/api/movies", {
@@ -78,7 +83,7 @@ export default function ListMovies() {
         });
         if (response.ok) {
           const savedMovie = await response.json();
-          setMovies((prev) => [...prev, savedMovie]);
+          setListMovies((prev) => [...prev, savedMovie]);
         } else {
           console.error("Erreur lors de l'enregistrement du film");
         }
@@ -94,23 +99,16 @@ export default function ListMovies() {
 
   // Mise à jour de handleDeleteMovie pour supprimer via l'API
   const handleDeleteMovie = async (movie) => {
-    if (!authorized) {
-      const enteredPassword = prompt(
-        "Entrez le mot de passe pour supprimer un film :"
-      );
-      if (enteredPassword === DELETE_PASSWORD) {
-        setAuthorized(true);
-      } else {
-        alert("Mot de passe incorrect");
-        return;
-      }
+    if (!adminAuthenticated) {
+      alert("Vous devez être admin pour supprimer un film");
+      return;
     }
     try {
       const response = await fetch(`/api/movies?imdbID=${movie.imdbID}`, {
         method: "DELETE",
       });
       if (response.ok) {
-        setMovies((prev) =>
+        setListMovies((prev) =>
           prev.filter((m) => m.imdbID !== movie.imdbID)
         );
       } else {
@@ -181,7 +179,7 @@ export default function ListMovies() {
         <h2 className="text-2xl font-semibold mb-4 text-center">
           Films et séries dans la liste d'attente
         </h2>
-        {loadingMovies ? (
+        {loadingListMovies ? (
           <div className="flex flex-wrap gap-6 justify-center">
             {[...Array(4)].map((_, index) => (
               <div
@@ -192,11 +190,11 @@ export default function ListMovies() {
               </div>
             ))}
           </div>
-        ) : movies.length === 0 ? (
+        ) : listMovies.length === 0 ? (
           <p className="text-center text-gray-500">Aucun film dans la liste d'attente</p>
         ) : (
           <div className="flex flex-wrap gap-6 justify-center">
-            {movies.map((movie) => (
+            {listMovies.map((movie) => (
               <div
                 key={movie.imdbID}
                 className="relative border border-gray-300 dark:border-gray-800 hover:border-blue-300 hover:dark:border-blue-900 rounded-lg overflow-hidden w-40 text-center shadow transition-all hover:scale-105"
@@ -217,7 +215,8 @@ export default function ListMovies() {
                   <p className="text-sm text-gray-500">{movie.Year}</p>
                 </div>
                 {/* Bouton Supprimer en haut à gauche */}
-                <button
+                {adminAuthenticated && (
+                  <button
                   onClick={() => handleDeleteMovie(movie)}
                   className="group absolute top-2 -right-2 hover:right-0 bg-red-500 opacity-10 text-white text-xs p-2 rounded-l transition-all hover:bg-red-600 hover:opacity-100"
                 >
@@ -225,6 +224,8 @@ export default function ListMovies() {
                     <img src="/trash.svg" alt="Supprimer" className="w-4 h-4" />
                   </span>
                 </button>
+                )}
+                
 
                 {/* Bouton Voir plus en haut à droite */}
                 <a

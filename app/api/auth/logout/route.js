@@ -11,6 +11,12 @@ export async function POST(request) {
         path: "/",
         expires: new Date(0), // Expire immédiatement
     });
+    // response.cookies.set("lastLoginAs", "", {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === "production",
+    //     path: "/",
+    //     expires: new Date(0), // Expire immédiatement
+    //   });
 
     return response;
 }
