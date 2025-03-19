@@ -56,6 +56,7 @@ export default function Brunch() {
       } else {
         const res = await fetch("/api/users/public");
         const data = await res.json();
+        setUsers(data);
         setUsersLoading(false);
       }
       
