@@ -67,7 +67,7 @@ export default function Home() {
 
   return (
     <>
-      <Navbar current="films" />
+      <Navbar current="films" authenticated={authenticated} adminAuthenticated={adminAuthenticated} />
       <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-4 lg:p-8">
         <Hero adminAuthenticated={adminAuthenticated} subtitle="Movie Adder" />
         

@@ -1,8 +1,12 @@
 import React, { useState } from 'react'
 
-export default function Navbar({ current }) {
+export default function Navbar({ current, authenticated, adminAuthenticated }) {
     const [menuOpen, setMenuOpen] = useState(false);
     
+    const handleLogout = async () => {
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.location.replace("/"); // Recharge la page proprement
+    };
     
     const NavLink = ({ text, href, current }) => {
 
@@ -10,7 +14,7 @@ export default function Navbar({ current }) {
             return (
                 <>
                     <li>
-                        <a href={href} className="block py-2 px-3 text-white bg-blue-700 rounded-lg dark:bg-blue-600" aria-current="page">{text}</a>
+                        <a href={href} className="block py-2 px-3 text-white bg-gray-800 rounded-lg dark:bg-blue-600" aria-current="page">{text}</a>
                     </li>
                 </>
             )
@@ -40,8 +44,19 @@ export default function Navbar({ current }) {
                 </button>
                 <div className={`${menuOpen ? 'block' : 'hidden'} w-full`} id="navbar-hamburger">
                 <ul className="flex flex-col font-medium mt-4 gap-2 rounded-lg bg-gray-100 dark:bg-black dark:border-gray-700">
+                    
                     <NavLink text="Films" href="/" current={current === 'films'} />
                     <NavLink text="Abonnements" href="/brunch" current={current === 'abonnements'} />
+                    <div className='flex flex-row justify-between'>
+                        <li>
+                            <a onClick={handleLogout} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-white dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-blue-300 hover:dark:border-blue-900 transition-colors w-fit self-end place-self-end cursor-pointer">Se déconnecter</a>
+                        </li>
+                        <li>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 py-2">
+                            Connecté en tant que {adminAuthenticated ? 'admin' : (authenticated ? 'utilisateur' : 'invité')}
+                        </p>
+                        </li>
+                    </div>
                 </ul>
                 </div>
             </div>

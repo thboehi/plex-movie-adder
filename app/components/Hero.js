@@ -2,11 +2,6 @@ import React from 'react'
 
 export default function Hero({ adminAuthenticated, subtitle }) {
 
-    const handleLogout = async () => {
-        await fetch("/api/auth/logout", { method: "POST" });
-        window.location.replace("/"); // Recharge la page proprement
-        };
-
 
   return (
     <>
@@ -148,12 +143,12 @@ export default function Hero({ adminAuthenticated, subtitle }) {
           </p>
           )}
         {/* Un bouton pour se déconneter, donc en réinitialisant le cookie authToken et en rechargeant la page */}
-        <button
+        {/* <button
           onClick={handleLogout}
           className="mt-4 p-2 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
         >
           Se déconnecter
-        </button>
+        </button> */}
       </details>
 
     </>

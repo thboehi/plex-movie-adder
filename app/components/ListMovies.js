@@ -14,11 +14,6 @@ export default function ListMovies( { adminAuthenticated } ) {
   const [loadingListMovies, setLoadingListMovies] = useState(true);
   const [loading, setLoading] = useState(false);
   const [addingMovie, setAddingMovie] = useState(false);
-
-  // Attendre 3 secondes avant de log dans la console
-  setTimeout(() => {
-    console.log("adminAuthenticated : ", adminAuthenticated);
-  }, 3000);
   
 
   // Chargement des films persistés au montage
