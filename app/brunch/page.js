@@ -6,6 +6,7 @@ import LoginForm from "../components/LoginForm";
 import DecryptedText from '../components/DecryptedText';
 import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
+import { set } from "date-fns";
 
 export default function Brunch() {
 
@@ -18,6 +19,8 @@ export default function Brunch() {
   const [selectedUser, setSelectedUser] = useState("");
   const [paymentData, setPaymentData] = useState({ amount: "", months: "1" });
   const [newUser, setNewUser] = useState({ name: "", surname: "", email: "" });
+  const [userApi, setUserApi] = useState("/api/users/public");
+  
 
   useEffect(() => {
     // Vérifie l'authentification en appelant l'API dédiée
@@ -45,13 +48,20 @@ export default function Brunch() {
 
   async function fetchUsers() {
     try {
-      const res = await fetch("/api/users");
-      const data = await res.json();
-      setUsers(data);
+      if (adminAuthenticated) {
+        const res = await fetch("/api/users");
+        const data = await res.json();
+        setUsers(data);
+      } else {
+        const res = await fetch("/api/users/public");
+        const data = await res.json();
+        setUsers(data);
+      }
     } catch (error) {
       console.error("Erreur chargement utilisateurs", error);
     }
   }
+
 
   async function handleAddPayment() {
     if (!selectedUser || !paymentData.amount){
@@ -59,7 +69,7 @@ export default function Brunch() {
     }
     
     try {
-      await fetch("/api/brunch", {
+      await fetch("/api/brunch/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -223,7 +233,7 @@ export default function Brunch() {
                     key={user._id} 
                     className={`flex flex-col w-full items-center bg-white border ${isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200 hover:border-blue-300 hover:dark:border-blue-900'} dark:bg-gray-950 ${!isAboutToExpire ? 'dark:border-gray-800' : ''} p-4 rounded-md text-sm transition-all hover:scale-105`}
                     >
-                    <p className="text-xl font-bold">{user.name} {adminAuthenticated ? user.surname : "****"}</p>
+                    <p className="text-xl font-bold">{user.name} {user.surname}</p>
                     <p className={`text-xs mt-3 ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>{timeRemainingMessage}</p>
                     <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
                         {isAboutToExpire ? '' : new Date(user.subscriptionEnd).toLocaleDateString()}

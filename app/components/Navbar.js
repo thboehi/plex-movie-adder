@@ -18,7 +18,7 @@ export default function Navbar({ current }) {
             return (
                 <>
                     <li>
-                        <a href={href} className="block py-2 px-3 text-gray-900 rounded-lg bg-white hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white transition-colors">{text}</a>
+                        <a href={href} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-white dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-blue-300 hover:dark:border-blue-900 transition-colors">{text}</a>
                     </li>
                 </>
             )

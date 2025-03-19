@@ -40,7 +40,35 @@ export async function GET(req, res) {
   try {
     const { db } = await connectToDatabase();
     const users = await db.collection("users").find({}).toArray();
-    return NextResponse.json(users);
+
+    // Obtenir la date actuelle
+    const currentDate = new Date();
+    
+    // Trier les utilisateurs
+    const sortedUsers = users.sort((a, b) => {
+      const dateA = new Date(a.subscriptionEnd || 0);
+      const dateB = new Date(b.subscriptionEnd || 0);
+      
+      // Si les deux dates sont dans le passé
+      const isPastA = dateA < currentDate;
+      const isPastB = dateB < currentDate;
+      
+      if (isPastA && isPastB) {
+        // Les deux sont expirés - trier par date la plus lointaine dans le passé en premier
+        return dateA - dateB;
+      } else if (isPastA) {
+        // Seulement A est expiré - B vient en premier
+        return 1;
+      } else if (isPastB) {
+        // Seulement B est expiré - A vient en premier
+        return -1;
+      } else {
+        // Aucun n'est expiré - trier par date la plus proche en premier
+        return dateA - dateB;
+      }
+    });
+
+    return NextResponse.json(sortedUsers);
   } catch (error) {
     console.error("Erreur dans GET:", error);
     return NextResponse.json(

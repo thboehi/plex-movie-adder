@@ -34,65 +34,91 @@ function getIp(request) {
   );
 }
 
-export async function POST(request) {
-    try {
-      const { userId, amount, months } = await request.json();
-      const userIdObject = new ObjectId(userId);
-      console.log("Requête reçue:", { userId, amount, months });
-  
-      const { db } = await connectToDatabase();
-      const user = await db.collection("users").findOne({ _id: userIdObject });
-  
-      if (!user) {
-        console.error("Utilisateur non trouvé:", userId);
-        return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
+export async function GET(request) {
+  try {
+    const { db } = await connectToDatabase();
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    // Si un userId est fourni, récupérer les paiements de cet utilisateur spécifique
+    if (userId) {
+      console.log(`Récupération des paiements pour l'utilisateur: ${userId}`);
+      
+      // Vérifier d'abord si l'utilisateur existe
+      try {
+        const userIdObject = new ObjectId(userId);
+        const user = await db.collection("users").findOne({ _id: userIdObject });
+        
+        if (!user) {
+          return NextResponse.json(
+            { error: "Utilisateur introuvable" }, 
+            { status: 404 }
+          );
+        }
+        
+        // Récupérer les paiements pour cet utilisateur
+        const payments = await db.collection("brunch")
+          .find({ userId: userId })
+          .sort({ paymentDate: -1 }) // Tri par date décroissante (plus récent d'abord)
+          .toArray();
+        
+        return NextResponse.json({
+          userId,
+          userName: `${user.name}`,
+          userSurname: `${user.surname}`,
+          payments,
+          total: payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0)
+        });
+      } catch (error) {
+        // Si l'ID n'est pas un ObjectId valide
+        console.error("Erreur d'ID:", error.message);
+        return NextResponse.json(
+          { error: "ID utilisateur invalide" }, 
+          { status: 400 }
+        );
       }
-  
-      console.log("Utilisateur trouvé:", user);
-  
-      let newExpirationDate;
-      const now = new Date();
-  
-      if (user.subscriptionEnd && new Date(user.subscriptionEnd) > now) {
-        // Ajoute les mois à la date actuelle d'expiration
-        newExpirationDate = new Date(user.subscriptionEnd);
-        console.log("Abonnement en cours, nouvelle date de départ:", newExpirationDate);
-      } else {
-        // Si expiré ou jamais eu d'abonnement, on part d'aujourd'hui
-        newExpirationDate = now;
-        console.log("Aucun abonnement actif, départ aujourd'hui:", newExpirationDate);
-      }
-  
-      // Ajouter les mois
-      newExpirationDate.setMonth(newExpirationDate.getMonth() + parseInt(months, 10));
-      console.log("Nouvelle date d'expiration:", newExpirationDate);
-  
-      // Mettre à jour la date d'expiration de l'utilisateur
-      const updateResult = await db.collection("users").updateOne(
-        { _id: userIdObject },
-        { $set: { subscriptionEnd: newExpirationDate } }
+    } 
+    // Sinon, récupérer tous les paiements
+    else {
+      console.log("Récupération de tous les paiements");
+      
+      // Récupérer tous les paiements
+      const payments = await db.collection("brunch")
+        .find({})
+        .sort({ paymentDate: -1 })
+        .toArray();
+      
+      // Enrichir les données avec les informations des utilisateurs
+      const enhancedPayments = await Promise.all(
+        payments.map(async (payment) => {
+          try {
+            const userIdObject = new ObjectId(payment.userId);
+            const user = await db.collection("users").findOne({ _id: userIdObject });
+            
+            return {
+              ...payment,
+              userName: user ? `${user.name} ${user.surname}` : "Utilisateur inconnu"
+            };
+          } catch (error) {
+            return {
+              ...payment,
+              userName: "ID utilisateur invalide"
+            };
+          }
+        })
       );
-  
-      console.log("Résultat de la mise à jour:", updateResult);
-  
-      if (updateResult.modifiedCount === 0) {
-        console.warn("Aucune mise à jour effectuée, vérifiez l'ID utilisateur.");
-      }
-  
-      // Enregistrer le paiement dans brunch
-      const newPayment = {
-        userId,
-        amount,
-        months,
-        paymentDate: now,
-      };
-      const paymentInsertResult = await db.collection("brunch").insertOne(newPayment);
-  
-      console.log("Paiement ajouté:", paymentInsertResult);
-  
-      return NextResponse.json({ success: true, newExpirationDate }, { status: 200 });
-    } catch (error) {
-      console.error("Erreur ajout abonnement:", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+      
+      return NextResponse.json({
+        payments: enhancedPayments,
+        total: payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0),
+        count: payments.length
+      });
     }
+  } catch (error) {
+    console.error("Erreur récupération paiements:", error);
+    return NextResponse.json(
+      { error: "Erreur serveur lors de la récupération des paiements" }, 
+      { status: 500 }
+    );
   }
+}
