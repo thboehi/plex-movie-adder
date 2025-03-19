@@ -14,7 +14,7 @@ export default function Navbar({ current, authenticated, adminAuthenticated }) {
             return (
                 <>
                     <li>
-                        <a href={href} className="block py-2 px-3 text-white bg-gray-800 rounded-lg dark:bg-blue-600" aria-current="page">{text}</a>
+                        <a href={href} className="block py-2 px-3 text-white bg-gray-800 rounded-lg dark:bg-gray-600" aria-current="page">{text}</a>
                     </li>
                 </>
             )
