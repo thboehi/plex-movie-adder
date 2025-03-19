@@ -13,13 +13,13 @@ export default function Brunch() {
   const [authenticated, setAuthenticated] = useState(false);
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [usersLoading, setUsersLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
   const [paymentData, setPaymentData] = useState({ amount: "", months: "1" });
   const [newUser, setNewUser] = useState({ name: "", surname: "", email: "" });
-  const [userApi, setUserApi] = useState("/api/users/public");
   
 
   useEffect(() => {
@@ -52,11 +52,17 @@ export default function Brunch() {
         const res = await fetch("/api/users");
         const data = await res.json();
         setUsers(data);
+        // Simuler une attente de 3 secondes
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        setUsersLoading(false);
       } else {
         const res = await fetch("/api/users/public");
         const data = await res.json();
         setUsers(data);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        setUsersLoading(false);
       }
+      
     } catch (error) {
       console.error("Erreur chargement utilisateurs", error);
     }
@@ -207,40 +213,62 @@ export default function Brunch() {
             {/* Afficher chaque utilisateur et sa date d'expiration de l'abonnement */}
             <h2 className="text-lg font-bold mb-4 text-center">Abonnements aux brunchs actifs</h2>
             <div className="flex flex-col items-center gap-2">
-            {users.map(user => {
-                // Calculer le temps restant
-                const now = new Date();
-                const subscriptionEnd = new Date(user.subscriptionEnd);
-                const timeRemaining = subscriptionEnd - now;
-                const daysRemaining = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-                const hoursRemaining = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                
-                // Vérifier si l'abonnement se termine dans 7 jours ou moins
-                const isAboutToExpire = daysRemaining <= 7;
-                
-                // Construire le message du temps restant
-                let timeRemainingMessage;
-                if (daysRemaining < 0) {
-                    timeRemainingMessage = "Abonnement expiré";
-                } else if (isAboutToExpire) {
-                    timeRemainingMessage = `Abonnement se termine dans ${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''} et ${hoursRemaining} heure${hoursRemaining !== 1 ? 's' : ''}`;
-                } else {
-                    timeRemainingMessage = "Abonnement jusqu'au";
-                }
-                
-                return (
-                    <div 
-                    key={user._id} 
-                    className={`flex flex-col w-full items-center bg-white border ${isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200 hover:border-blue-300 hover:dark:border-blue-900'} dark:bg-gray-950 ${!isAboutToExpire ? 'dark:border-gray-800' : ''} p-4 rounded-md text-sm transition-all hover:scale-105`}
-                    >
-                    <p className="text-xl font-bold">{user.name} {user.surname}</p>
-                    <p className={`text-xs mt-3 ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>{timeRemainingMessage}</p>
-                    <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
-                        {isAboutToExpire ? '' : new Date(user.subscriptionEnd).toLocaleDateString()}
-                    </p>
-                    </div>
-                );
-                })}
+            {usersLoading ? (
+              // Skeleton loader pour les cartes utilisateurs
+              [...Array(4)].map((_, index) => (
+                <div 
+                  key={index} 
+                  className="flex flex-col w-full items-center bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-4 rounded-md text-sm"
+                >
+                  <div className="relative w-full">
+                  <div className="h-7 w-32 mb-3 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                </div>
+                <div className="h-4 w-24 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md mb-2 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                </div>
+                <div className="h-4 w-20 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                </div>
+                  </div>
+                </div>
+              ))
+              ) : (
+                users.map(user => {
+                  // Calculer le temps restant
+                  const now = new Date();
+                  const subscriptionEnd = new Date(user.subscriptionEnd);
+                  const timeRemaining = subscriptionEnd - now;
+                  const daysRemaining = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                  const hoursRemaining = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                  
+                  // Vérifier si l'abonnement se termine dans 7 jours ou moins
+                  const isAboutToExpire = daysRemaining <= 7;
+                  
+                  // Construire le message du temps restant
+                  let timeRemainingMessage;
+                  if (daysRemaining < 0) {
+                      timeRemainingMessage = "Abonnement expiré";
+                  } else if (isAboutToExpire) {
+                      timeRemainingMessage = `Abonnement se termine dans ${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''} et ${hoursRemaining} heure${hoursRemaining !== 1 ? 's' : ''}`;
+                  } else {
+                      timeRemainingMessage = "Abonnement jusqu'au";
+                  }
+                  
+                  return (
+                      <div 
+                      key={user._id} 
+                      className={`flex flex-col w-full items-center bg-white border ${isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200 hover:border-blue-300 hover:dark:border-blue-900'} dark:bg-gray-950 ${!isAboutToExpire ? 'dark:border-gray-800' : ''} p-4 rounded-md text-sm transition-all hover:scale-105`}
+                      >
+                      <p className="text-xl font-bold">{user.name} {user.surname}</p>
+                      <p className={`text-xs mt-3 ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>{timeRemainingMessage}</p>
+                      <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
+                          {isAboutToExpire ? '' : new Date(user.subscriptionEnd).toLocaleDateString()}
+                      </p>
+                      </div>
+                  );
+                  })
+              )}
             </div>
             </div>
         
