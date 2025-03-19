@@ -1,7 +1,44 @@
-import React from 'react'
+import { set } from 'date-fns';
+import React, { useState, useRef, useEffect } from 'react';
 
 export default function Hero({ adminAuthenticated, subtitle }) {
-
+  const [isOpen, setIsOpen] = useState(false);
+  const contentRef = useRef(null);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [boxWidth, setBoxWidth] = useState('max-w-[160px]');
+  const [animating, setAnimating] = useState(false);
+  
+  // Gérer l'animation d'ouverture/fermeture
+  useEffect(() => {
+    if (contentRef.current) {
+      if (isOpen) {
+        // D'abord élargir
+        setBoxWidth('max-w-xl');
+        
+        // Ensuite augmenter la hauteur avec un léger délai
+        setTimeout(() => {
+          setContentHeight(contentRef.current.scrollHeight);
+        }, 300);
+      } else {
+        // D'abord réduire la hauteur
+        setContentHeight(0);
+        
+        // Ensuite réduire la largeur avec un délai
+        setTimeout(() => {
+          setBoxWidth('max-w-[160px]');
+        }, 300);
+      }
+    }
+  }, [isOpen]);
+  
+  const toggleDetails = (e) => {
+    if (animating) return;
+    setAnimating(true);
+    setIsOpen(!isOpen);
+    setTimeout(() => {
+      setAnimating(false);
+    }, 400);
+  };
 
   return (
     <>
@@ -116,7 +153,7 @@ export default function Hero({ adminAuthenticated, subtitle }) {
             </g>
           </svg>
         </div>
-        <h1 className="text-4xl font-bold text-gray-800 dark:text-white">
+        <h1 className="text-4xl font-bold text-gray-800 text-center dark:text-white">
           {subtitle}
         </h1>
         {/* {adminAuthenticated && (
@@ -127,29 +164,39 @@ export default function Hero({ adminAuthenticated, subtitle }) {
       </header>
       
       {/* Section Information */}
-      <details className="max-w-xl bg-white border border-gray-200 hover:border-blue-300 hover:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 p-4 rounded-md mb-16 text-sm transition-colors">
-        <summary className="cursor-pointer font-semibold text-gray-700 dark:text-gray-50">
-          Informations
-        </summary>
-        <p className="text-gray-600 dark:text-gray-50">
-          Notez que les films venant de sortir au cinéma prennent souvent <strong>quelques mois avant d'être disponibles</strong> en VOD.
-        </p>
-        <p className="text-gray-600 dark:text-gray-50 text-xs pt-7">
-          Ceci est un site de test, aucun piratage de film n'a été ou ne sera réalisé. Cet outil permet simplement de tester le contacte d'une API de librairie de films en utilisant le framework NextJS. Il fait partie d'un exercice réalisé pour une école de Web Developement.
-        </p>
-        {adminAuthenticated && (
-          <p className="text-red-500 dark:text-red-500 text-xs pt-7">
-            ⚠️ Vous êtes actuellement connecté en tant qu'administrateur. Ce privilège vient avec de grandes responsabilités. Merci de ne pas abuser de ce pouvoir et de faire attention à ce que vous faites. Sachez que chaque action est loggée et peut être suivie.
-          </p>
-          )}
-        {/* Un bouton pour se déconneter, donc en réinitialisant le cookie authToken et en rechargeant la page */}
-        {/* <button
-          onClick={handleLogout}
-          className="mt-4 p-2 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
+      <div 
+        className={`${boxWidth} mx-auto bg-white border border-gray-200 hover:border-blue-300 hover:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 p-4 rounded-md mb-16 text-sm transition-all duration-300 ease-in-out`}
+      >
+        <div 
+          className="cursor-pointer font-semibold text-gray-700 dark:text-gray-50 flex items-center whitespace-nowrap"
+          onClick={toggleDetails}
         >
-          Se déconnecter
-        </button> */}
-      </details>
+          <span className={`mr-2 transform transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}>
+            ▶
+          </span>
+          Informations
+        </div>
+        
+        <div 
+          ref={contentRef}
+          className="overflow-hidden transition-all duration-300 ease-in-out"
+          style={{ maxHeight: `${contentHeight}px` }}
+        >
+          <div className="pt-4">
+            <p className="text-gray-600 dark:text-gray-50">
+              Notez que les films venant de sortir au cinéma prennent souvent <strong>quelques mois avant d'être disponibles</strong> en VOD.
+            </p>
+            <p className="text-gray-600 dark:text-gray-50 text-xs pt-7">
+              Ceci est un site de test, aucun piratage de film n'a été ou ne sera réalisé. Cet outil permet simplement de tester le contacte d'une API de librairie de films en utilisant le framework NextJS. Il fait partie d'un exercice réalisé pour une école de Web Developement.
+            </p>
+            {adminAuthenticated && (
+              <p className="text-red-500 dark:text-red-500 text-xs pt-7">
+                ⚠️ Vous êtes actuellement connecté en tant qu'administrateur. Ce privilège vient avec de grandes responsabilités. Merci de ne pas abuser de ce pouvoir et de faire attention à ce que vous faites. Sachez que chaque action est loggée et peut être suivie.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
 
     </>
   )

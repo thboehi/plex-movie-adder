@@ -97,7 +97,8 @@ export async function GET(request) {
             
             return {
               ...payment,
-              userName: user ? `${user.name} ${user.surname}` : "Utilisateur inconnu"
+              userName: user ? `${user.name}` : "****",
+              userSurname: user ? `${user.surname}` : "****"
             };
           } catch (error) {
             return {
