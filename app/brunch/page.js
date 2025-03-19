@@ -52,14 +52,10 @@ export default function Brunch() {
         const res = await fetch("/api/users");
         const data = await res.json();
         setUsers(data);
-        // Simuler une attente de 3 secondes
-        await new Promise(resolve => setTimeout(resolve, 3000));
         setUsersLoading(false);
       } else {
         const res = await fetch("/api/users/public");
         const data = await res.json();
-        setUsers(data);
-        await new Promise(resolve => setTimeout(resolve, 3000));
         setUsersLoading(false);
       }
       
