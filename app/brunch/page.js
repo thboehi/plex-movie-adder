@@ -6,7 +6,7 @@ import LoginForm from "../components/LoginForm";
 import DecryptedText from '../components/DecryptedText';
 import Hero from "../components/Hero";
 import Navbar from "../components/Navbar";
-import { set } from "date-fns";
+import { Select, Option, Typography } from "@material-tailwind/react";
 
 export default function Brunch() {
 
@@ -134,7 +134,7 @@ export default function Brunch() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
         <div className="flex justify-center items-center">
           {/* Demi rond stylisé qui tourne */}
-          <div className="w-12 h-12 border-4 border-blue-700 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
         </div>
       </div>
     );
@@ -154,57 +154,234 @@ export default function Brunch() {
         
         {/* Contenu principal */}
         {adminAuthenticated && (
-            <div>
-            <button onClick={openModal} className="bg-blue-700 hover:bg-blue-600 transition-colors text-white px-4 py-2 mb-8 rounded-lg">Ajouter un paiement</button>
+          <div>
+            <button onClick={openModal} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-white dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-orange transition-colors w-full self-end place-self-end cursor-pointer mb-12">Ajouter un paiement</button>
             
             {isModalOpen && (
-                <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-filter">
-                <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-                    {modalStep === 1 && (
-                    <div>
-                        <h2 className="text-lg font-bold mb-4">Sélectionner un utilisateur</h2>
-                        <select
-                        className="w-full border rounded-lg p-2"
-                        value={selectedUser}
-                        onChange={(e) => {
-                            setSelectedUser(e.target.value);
-                            setModalStep(e.target.value === "new" ? 2 : 3);
-                        }}
+              <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm transition-all duration-300">
+                <div 
+                  className="bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-800 p-6 w-96 max-w-[90%] transform transition-all duration-300 ease-in-out"
+                  style={{
+                    animation: "modalFadeIn 0.3s ease-out forwards"
+                  }}
+                >
+                  {modalStep === 1 && (
+                    <div className="space-y-4">
+                      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
+                        <svg className="w-5 h-5 mr-2 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        Sélectionner un utilisateur
+                      </h2>
+                      
+                      <div className="w-full">
+                        <Select
+                          label="Choisir un utilisateur"
+                          value={selectedUser}
+                          onChange={(value) => {
+                            setSelectedUser(value);
+                            setTimeout(() => {
+                              setModalStep(value === "new" ? 2 : 3);
+                            }, 150);
+                          }}
+                          className="border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white"
+                          labelProps={{
+                            className: "text-gray-700 dark:text-gray-300"
+                          }}
+                          menuProps={{
+                            className: "bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700"
+                          }}
+                          color="amber"
                         >
-                        <option value="">Choisir un utilisateur</option>
-                        {users.map(user => (
-                            <option key={user._id} value={user._id}>{user.name} {user.surname}</option>
-                        ))}
-                        <option value="new" key="new">Nouvel utilisateur</option>
-                        </select>
+                          {users.map(user => (
+                            <Option key={user._id} value={user._id} className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                              <div className="flex items-center gap-2">
+                                <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                  <Typography className="font-bold text-xs">
+                                    {user.name.charAt(0)}{user.surname.charAt(0)}
+                                  </Typography>
+                                </div>
+                                <Typography className="font-normal">
+                                  {user.name} {user.surname}
+                                </Typography>
+                              </div>
+                            </Option>
+                          ))}
+                          <Option value="new" className="text-orange font-medium border-t border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-orange bg-opacity-20 flex items-center justify-center">
+                                <svg className="w-3 h-3 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                              </div>
+                              <Typography className="font-medium">
+                                Nouvel utilisateur
+                              </Typography>
+                            </div>
+                          </Option>
+                        </Select>
+                      </div>
+                      
+                      {selectedUser && (
+                        <div className="mt-4 animate-fadeIn">
+                          <div className="p-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
+                            <Typography className="text-gray-700 dark:text-gray-300 text-sm">
+                              {selectedUser === "new" 
+                                ? "Créer un nouvel utilisateur" 
+                                : `Utilisateur sélectionné: ${users.find(u => u._id === selectedUser)?.name || ""} ${users.find(u => u._id === selectedUser)?.surname || ""}`
+                              }
+                            </Typography>
+                            <button 
+                              onClick={() => {
+                                setTimeout(() => {
+                                  setModalStep(selectedUser === "new" ? 2 : 3);
+                                }, 150);
+                              }}
+                              className="bg-orange text-white p-2 rounded-md hover:bg-opacity-90 transition-all"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    )}
-                    {modalStep === 2 && (
-                    <div>
-                        <h2 className="text-lg font-bold mb-4">Ajouter un utilisateur</h2>
-                        <input type="text" placeholder="Prénom" className="w-full border rounded-lg p-2 mb-2" value={newUser.name} onChange={(e) => setNewUser({...newUser, name: e.target.value})} />
-                        <input type="text" placeholder="Nom" className="w-full border rounded-lg p-2 mb-2" value={newUser.surname} onChange={(e) => setNewUser({...newUser, surname: e.target.value})} />
-                        <input type="email" placeholder="Email" className="w-full border rounded-lg p-2 mb-4" value={newUser.email} onChange={(e) => setNewUser({...newUser, email: e.target.value})} />
-                        <button onClick={handleAddUser} className="bg-blue-700 hover:bg-blue-600 transition-colors text-white px-4 py-2 rounded-lg">Ajouter</button>
+                  )}
+
+                  {modalStep === 2 && (
+                    <div className="space-y-4 transform transition-all duration-300 ease-in-out" style={{ animation: "slideIn 0.3s ease-out forwards" }}>
+                      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
+                        <svg className="w-5 h-5 mr-2 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        Ajouter un utilisateur
+                      </h2>
+                      
+                      <div className="space-y-3">
+                        <input 
+                          type="text" 
+                          placeholder="Prénom" 
+                          className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
+                          value={newUser.name} 
+                          onChange={(e) => setNewUser({...newUser, name: e.target.value})} 
+                        />
+                        
+                        <input 
+                          type="text" 
+                          placeholder="Nom" 
+                          className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
+                          value={newUser.surname} 
+                          onChange={(e) => setNewUser({...newUser, surname: e.target.value})} 
+                        />
+                        
+                        <input 
+                          type="email" 
+                          placeholder="Email" 
+                          className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
+                          value={newUser.email} 
+                          onChange={(e) => setNewUser({...newUser, email: e.target.value})} 
+                        />
+                        
+                        <button 
+                          onClick={handleAddUser} 
+                          className="w-full bg-orange hover:bg-opacity-90 transition-colors text-white font-medium px-4 py-3 rounded-lg mt-2 flex items-center justify-center"
+                        >
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          Ajouter l'utilisateur
+                        </button>
+                      </div>
                     </div>
-                    )}
-                    {modalStep === 3 && (
-                    <div>
-                        <h2 className="text-lg font-bold mb-4">Ajouter un paiement</h2>
-                        <input type="number" placeholder="Montant" className="w-full border rounded-lg p-2 mb-2" value={paymentData.amount} onChange={(e) => setPaymentData({...paymentData, amount: e.target.value})} />
-                        <select className="w-full border rounded-lg p-2 mb-4" value={paymentData.months} onChange={(e) => setPaymentData({...paymentData, months: e.target.value})}>
-                        <option value="1">1 mois</option>
-                        <option value="12">12 mois</option>
-                        </select>
-                        <button onClick={handleAddPayment} className="bg-blue-500 text-white px-4 py-2 rounded-lg">Confirmer</button>
+                  )}
+
+                  {modalStep === 3 && (
+                    <div className="space-y-4 transform transition-all duration-300 ease-in-out" style={{ animation: "slideIn 0.3s ease-out forwards" }}>
+                      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
+                        <svg className="w-5 h-5 mr-2 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        Ajouter un paiement
+                      </h2>
+                      
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <input 
+                            type="number" 
+                            placeholder="0" 
+                            className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 pl-12 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
+                            value={paymentData.amount} 
+                            onChange={(e) => setPaymentData({...paymentData, amount: e.target.value})} 
+                          />
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                            CHF
+                          </span>
+                        </div>
+                        
+                        <Select
+                          label="Durée d'abonnement"
+                          value={paymentData.months}
+                          onChange={(value) => setPaymentData({...paymentData, months: value})}
+                          className="border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white"
+                          labelProps={{
+                            className: "text-gray-700 dark:text-gray-300"
+                          }}
+                          menuProps={{
+                            className: "bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700"
+                          }}
+                          color="amber"
+                        >
+                          <Option value="1" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <Typography className="font-bold text-xs">1</Typography>
+                              </div>
+                              <Typography className="font-normal">
+                                1 mois d'abonnement
+                              </Typography>
+                            </div>
+                          </Option>
+                          
+                          <Option value="12" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-orange bg-opacity-20 flex items-center justify-center">
+                                <Typography className="font-bold text-xs text-orange">12</Typography>
+                              </div>
+                              <Typography className="font-normal">
+                                12 mois d'abonnement
+                              </Typography>
+                            </div>
+                          </Option>
+                        </Select>
+                        
+                        <button 
+                          onClick={handleAddPayment} 
+                          className="w-full bg-orange hover:bg-opacity-90 transition-colors text-white font-medium px-4 py-3 rounded-lg mt-2 flex items-center justify-center"
+                        >
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Confirmer le paiement
+                        </button>
+                      </div>
                     </div>
-                    )}
-                    <button onClick={closeModal} className="mt-4 text-red-500">Annuler</button>
+                  )}
+                  
+                  <button 
+                    onClick={closeModal} 
+                    className="mt-6 w-full border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-700 dark:text-gray-300 rounded-lg hover:border-orange dark:hover:border-orange transition-colors flex items-center justify-center"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Annuler
+                  </button>
                 </div>
-                </div>
+              </div>
             )}
-            </div>
-            )}
+          </div>
+          )}
 
             <div>
             {/* Afficher chaque utilisateur et sa date d'expiration de l'abonnement */}
@@ -255,7 +432,7 @@ export default function Brunch() {
                   return (
                       <div 
                       key={user._id} 
-                      className={`flex flex-col w-full items-center bg-white border ${isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200 hover:border-blue-300 hover:dark:border-blue-900'} dark:bg-gray-950 ${!isAboutToExpire ? 'dark:border-gray-800' : ''} p-4 rounded-md text-sm transition-all hover:scale-105`}
+                      className={`flex flex-col w-full items-center bg-white border ${isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200'} dark:bg-gray-900 ${!isAboutToExpire ? 'dark:border-gray-800' : ''} p-4 rounded-md text-sm transition-all hover:scale-105`}
                       >
                       <p className="text-xl font-bold">{user.name} {user.surname}</p>
                       <p className={`text-xs mt-3 ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>{timeRemainingMessage}</p>

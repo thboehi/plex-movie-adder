@@ -58,7 +58,7 @@ export default function AddedMovies() {
           {addedMovies.slice(0, visibleCount).map((movie) => (
             <div
               key={movie.imdbID}
-              className="group border border-gray-300 dark:border-gray-800 hover:border-blue-300 hover:dark:border-blue-900 rounded-lg overflow-hidden w-24 text-center shadow hover:scale-105 transition-transform"
+              className="group border border-gray-300 dark:border-gray-800  rounded-lg overflow-hidden w-24 text-center shadow hover:shadow-lg hover:scale-105 transition-all"
             >
               {movie.Poster && movie.Poster !== "N/A" ? (
                 <img
@@ -91,9 +91,9 @@ export default function AddedMovies() {
           {addedMovies.length > visibleCount ? (
   <button
     onClick={() =>
-      setVisibleCount((prev) => Math.min(prev + 5, addedMovies.length))
+      setVisibleCount((prev) => Math.min(prev + 10, addedMovies.length))
     }
-    className="p-6 min-h-52 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
+    className="w-[98] min-h-52 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-900 dark:text-white dark:border-gray-800 dark:hover:bg-gray-800 shadow transition-colors"
   >
     Voir plus<br/>
     {visibleCount} / {addedMovies.length}
@@ -102,7 +102,7 @@ export default function AddedMovies() {
   addedMovies.length > 5 && (
     <button
       onClick={() => setVisibleCount(5)}
-      className="p-6 min-h-52 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-950 dark:text-white dark:border-gray-800 dark:hover:bg-gray-900 shadow transition-colors"
+      className="w-[98] min-h-52 bg-gray-200 text-black rounded-md border hover:bg-gray-300 border-gray-300 dark:bg-gray-900 dark:text-white dark:border-gray-800 dark:hover:bg-gray-800 shadow transition-colors"
     >
       Réduire
     </button>

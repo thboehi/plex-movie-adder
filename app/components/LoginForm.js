@@ -2,6 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Checkbox } from "@material-tailwind/react";
 import SplashCursor from "./SplashCursor";
 
 export default function LoginForm({ onSuccess }) {
@@ -10,6 +11,7 @@ export default function LoginForm({ onSuccess }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
+  const [onInputFocus, setOnInputFocus] = useState(false);
 
   // Récupérer le cookie lastLoginAs
   // Récupérer les cookies et les transformer en objet
@@ -83,7 +85,9 @@ export default function LoginForm({ onSuccess }) {
   return (
     <>
       
-      <div className="min-h-svh w-full overscroll-none overflow-hidden fixed flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
+      <div className={`min-h-svh w-full overscroll-none overflow-hidden fixed flex flex-col items-center justify-center p-8 z-[55] transition-all duration-300 ${
+          onInputFocus ? "backdrop-blur-2xl " : ""
+        }`}>
         <header className="flex flex-col items-center mb-12 z-50">
           {/* Logo SVG de Plex */}
           <div className="w-40 mb-1">
@@ -207,29 +211,29 @@ export default function LoginForm({ onSuccess }) {
           </div>
         ) : (
           <>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 z-50">
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md outline-none focus:border-blue-300 focus:ring-2 hover:border-blue-300 hover:dark:border-blue-900 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 transition-colors"
-            />
-            {/* Ajouter un toggle switch pour activer la connexion admin */}
-            <div className="flex items-center me-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-12">
+            <div>
               <input
-                id="adminLogin"
-                type="checkbox"
-                className="form-checkbox h-5 w-5 text-blue-600"
-                checked={adminLogin}
-                onChange={() => setAdminLogin(!adminLogin)}
+                type="password"
+                placeholder="Mot de passe"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setOnInputFocus(true)}
+                onBlur={() => setOnInputFocus(false)}
+                className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md outline-none focus:border-orange focus:ring-2 focus:ring-orange hover:border-orange hover:dark:border-orange focus:dark:border-orange dark:bg-gray-900 dark:border-gray-800 transition-colors"
               />
-              <label htmlFor="adminLogin" className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Connexion admin</label>
-              {/* <span className="text-sm text-gray-700 dark:text-gray-50">Connexion admin</span> */}
+              <Checkbox
+                defaultChecked={lastLoginAs === "admin"}
+                ripple={false}
+                onClick={() => setAdminLogin(!adminLogin)}
+                label="Connexion admin"
+                className="h-8 w-8 rounded-full border-gray-900/20 bg-gray-900/10 transition-all hover:scale-105 hover:before:opacity-0"
+              />
             </div>
+
             <button
               type="submit"
-              className="bg-neon-blue hover:bg-neon-blue-darker transition-colors text-white px-4 py-2 rounded-md"
+              className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-gray-200 dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-orange transition-colors w-full self-end place-self-end cursor-pointer"
             >
               Se connecter
             </button>

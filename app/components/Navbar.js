@@ -32,7 +32,7 @@ export default function Navbar({ current, authenticated, adminAuthenticated }) {
             return (
                 <>
                     <li>
-                        <a href={href} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-white dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-blue-300 hover:dark:border-blue-900 transition-colors">{text}</a>
+                        <a href={href} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-white dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-orange transition-colors">{text}</a>
                     </li>
                 </>
             )
@@ -74,7 +74,7 @@ export default function Navbar({ current, authenticated, adminAuthenticated }) {
                         <NavLink text="Abonnements" href="/brunch" current={current === 'abonnements'} />
                         <div className='flex flex-row-reverse justify-start gap-4 my-6'>
                             <li>
-                                <a onClick={handleLogout} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-gray-200 dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-blue-300 hover:dark:border-blue-900 transition-colors text-xs w-fit self-end place-self-end cursor-pointer">Se déconnecter</a>
+                                <a onClick={handleLogout} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-gray-200 dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-orange transition-colors text-xs w-fit self-end place-self-end cursor-pointer">Se déconnecter</a>
                             </li>
                             <li>
                                 <p className="text-sm text-gray-600 dark:text-gray-400 py-2">

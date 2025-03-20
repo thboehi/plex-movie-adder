@@ -123,7 +123,7 @@ export default function ListMovies( { adminAuthenticated } ) {
         placeholder="Rechercher un film..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="block w-full max-w-md p-3 text-lg border border-gray-300 rounded-md mb-8 outline-none focus:border-blue-300 focus:ring-2 hover:border-blue-300 hover:dark:border-blue-900 focus:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 transition-colors"
+        className="block w-full max-w-xl p-3 text-lg border border-gray-300 rounded-md mb-8 outline-none focus:border-orange focus:ring-2 focus:ring-orange hover:border-orange dark:bg-gray-900 dark:border-gray-800 transition-colors"
       />
 
       {/* Section des résultats de recherche */}
@@ -135,7 +135,7 @@ export default function ListMovies( { adminAuthenticated } ) {
           {loading ? (
             <div className="flex justify-center items-center">
               {/* Demi rond stylisé qui tourne */}
-              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-12 h-12 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
             results.length > 0 && (
@@ -144,7 +144,7 @@ export default function ListMovies( { adminAuthenticated } ) {
                   <div
                     key={movie.imdbID}
                     onClick={() => handleAddMovie(movie)}
-                    className="cursor-pointer border border-gray-300 rounded-lg overflow-hidden w-32 text-center shadow transition-transform duration-200 hover:scale-105 hover:shadow-lg"
+                    className="cursor-pointer border border-gray-300 rounded-lg overflow-hidden w-32 text-center shadow transition-all duration-200 hover:scale-105 hover:border-orange hover:shadow-lg"
                   >
                     {movie.Poster && movie.Poster !== "N/A" ? (
                       <img
@@ -175,7 +175,7 @@ export default function ListMovies( { adminAuthenticated } ) {
           Films et séries dans la liste d'attente
         </h2>
         {loadingListMovies ? (
-          <div className="flex flex-wrap gap-6 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center">
             {[...Array(4)].map((_, index) => (
               <div
                 key={index}
@@ -188,11 +188,11 @@ export default function ListMovies( { adminAuthenticated } ) {
         ) : listMovies.length === 0 ? (
           <p className="text-center text-gray-500">Aucun film dans la liste d'attente</p>
         ) : (
-          <div className="flex flex-wrap gap-6 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center">
             {listMovies.map((movie) => (
               <div
                 key={movie.imdbID}
-                className="relative border border-gray-300 dark:border-gray-800 hover:border-blue-300 hover:dark:border-blue-900 rounded-lg overflow-hidden w-40 text-center shadow transition-all hover:scale-105"
+                className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow transition-all hover:scale-105 hover:shadow-xl"
               >
                 {movie.Poster && movie.Poster !== "N/A" ? (
                   <img

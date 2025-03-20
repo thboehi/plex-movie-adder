@@ -1027,11 +1027,13 @@ function SplashCursor({
     }
 
     function generateColor() {
-      let c = HSVtoRGB(Math.random(), 1.0, 1.0);
-      c.r *= 0.15;
-      c.g *= 0.15;
-      c.b *= 0.15;
-      return c;
+      // Couleur fixe : #EBAF00 (235, 175, 0) en RGB
+      // Conversion en valeurs normalisées (0-1) pour WebGL
+      return { 
+        r: 235/255 * 0.15, 
+        g: 175/255 * 0.15, 
+        b: 0/255 * 0.15 
+      };
     }
 
     function HSVtoRGB(h, s, v) {

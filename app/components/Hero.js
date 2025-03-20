@@ -1,5 +1,5 @@
-import { set } from 'date-fns';
 import React, { useState, useRef, useEffect } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Hero({ adminAuthenticated, subtitle }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -165,7 +165,7 @@ export default function Hero({ adminAuthenticated, subtitle }) {
       
       {/* Section Information */}
       <div 
-        className={`${boxWidth} mx-auto bg-white border border-gray-200 hover:border-blue-300 hover:dark:border-blue-900 dark:bg-gray-950 dark:border-gray-800 p-4 rounded-md mb-16 text-sm transition-all duration-300 ease-in-out`}
+        className={`${boxWidth} mx-auto bg-white border border-gray-200 hover:border-orange dark:bg-gray-900 dark:border-gray-800 p-4 rounded-md mb-16 text-sm transition-all duration-300 ease-in-out`}
       >
         <div 
           className="cursor-pointer font-semibold text-gray-700 dark:text-gray-50 flex items-center whitespace-nowrap"
@@ -190,8 +190,8 @@ export default function Hero({ adminAuthenticated, subtitle }) {
               Ceci est un site de test, aucun piratage de film n'a été ou ne sera réalisé. Cet outil permet simplement de tester le contacte d'une API de librairie de films en utilisant le framework NextJS. Il fait partie d'un exercice réalisé pour une école de Web Developement.
             </p>
             {adminAuthenticated && (
-              <p className="text-red-500 dark:text-red-500 text-xs pt-7">
-                ⚠️ Vous êtes actuellement connecté en tant qu'administrateur. Ce privilège vient avec de grandes responsabilités. Merci de ne pas abuser de ce pouvoir et de faire attention à ce que vous faites. Sachez que chaque action est loggée et peut être suivie.
+              <p className="text-orange dark:text-orange text-xs pt-7">
+                ⚠️ Vous êtes actuellement connecté en tant qu'administrateur. Attention à ne pas supprimer des films sans faire exprès !
               </p>
             )}
           </div>
