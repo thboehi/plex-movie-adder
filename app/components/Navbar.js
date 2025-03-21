@@ -41,7 +41,7 @@ export default function Navbar({ current, authenticated, adminAuthenticated }) {
     }
   return (
     <>
-        <nav className="border-gray-200 bg-gray-100 dark:bg-black dark:border-gray-700 sticky top-0 z-50">
+        <nav className="border-gray-200 bg-gray-100/70 dark:bg-black/70 backdrop-blur-3xl dark:border-gray-700 sticky top-0 z-50">
             <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
                 <a href="#" className="flex items-center space-x-3 rtl:space-x-reverse">
                     <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"></span>
@@ -68,7 +68,7 @@ export default function Navbar({ current, authenticated, adminAuthenticated }) {
                         opacity: menuOpen ? 1 : 0
                     }}
                 >
-                    <ul className="flex flex-col font-medium mt-4 gap-2 rounded-lg bg-gray-100 dark:bg-black dark:border-gray-700">
+                    <ul className="flex flex-col font-medium mt-4 gap-2 rounded-lg dark:border-gray-700">
                         
                         <NavLink text="Films" href="/" current={current === 'films'} />
                         <NavLink text="Abonnements" href="/brunch" current={current === 'abonnements'} />
