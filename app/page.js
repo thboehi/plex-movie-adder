@@ -76,7 +76,7 @@ export default function Home() {
         <AddedMovies />
         <div className="m-20 p-10 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
           <p className="text-gray-400 dark:text-gray-700">Site web créé et maintenu par{" "}
-            <a className="group text-neon-blue font-bold transition-all hover:underline" href="https://thbo.ch" target="_blank">
+            <a className="group text-orange font-bold transition-all hover:underline" href="https://thbo.ch" target="_blank">
               <DecryptedText
                 text="thbo.ch"
                 speed={80}

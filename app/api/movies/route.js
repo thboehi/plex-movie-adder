@@ -107,7 +107,40 @@ export async function POST(request) {
     };
 
     await db.collection("movies").insertOne(movieToInsert);
+
+    // Notification à n8n
+    try {
+      // Préparer les données pour le webhook
+      const webhookData = {
+        title: movie.Title,
+        year: movie.Year,
+        imdbID: movie.imdbID,
+        poster: movie.Poster,
+        added_date: added_date
+      };
+
+      // Appel au webhook n8n
+      const webhookResponse = await fetch(process.env.N8N_WEBHOOK_LINK, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          [process.env.N8N_WEBHOOK_HEADER]: process.env.N8N_WEBHOOK_PASSWORD
+        },
+        body: JSON.stringify(webhookData)
+      });
+
+      if (!webhookResponse.ok) {
+        console.warn("Webhook notification failed:", await webhookResponse.text());
+      } else {
+        console.log("Webhook notification sent successfully");
+      }
+    } catch (webhookError) {
+      // On ne bloque pas le flux principal en cas d'erreur du webhook
+      console.error("Error sending webhook notification:", webhookError);
+    }
+
     return NextResponse.json(movieToInsert, { status: 201 });
+
   } catch (error) {
     console.error("Error in POST:", error);
     return NextResponse.json(
