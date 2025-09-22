@@ -129,6 +129,28 @@ export default function Brunch() {
     setNewUser({ name: "", surname: "", email: "" });
   }
 
+  // Liste d'utilisateurs à afficher selon le rôle:
+  // - Admin: aucun filtre, ordre inchangé (par date d'expiration tel que fourni).
+  // - Non-admin: filtrer les expirés depuis > 1 mois, trier par prénom (name).
+  function getDisplayUsers() {
+    if (usersLoading) return [];
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    if (adminAuthenticated) {
+      return users;
+    }
+
+    return [...users]
+      .filter(u => {
+        if (!u?.subscriptionEnd) return true; // on garde si pas de date connue
+        const end = new Date(u.subscriptionEnd);
+        if (isNaN(end)) return true; // on garde si date invalide
+        return end >= oneMonthAgo; // on cache si expiré depuis > 1 mois
+      })
+      .sort((a, b) => (a.name || "").localeCompare(b.name || "", "fr", { sensitivity: "base" }));
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
@@ -383,6 +405,47 @@ export default function Brunch() {
           </div>
           )}
 
+            <div className="w-full max-w-2xl mx-auto mb-10">
+              <h2 className="sr-only">Tarifs</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Mensuel */}
+                <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">Mensuel</span>
+                  </div>
+                  <div className="flex items-end gap-1">
+                    <span className="text-3xl font-bold text-gray-900 dark:text-white">9.90&nbsp;CHF</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">/mois</span>
+                  </div>
+                  <div className="mt-4 flex items-center gap-2 text-xs">
+                    <span className="text-gray-600 dark:text-gray-300">Paiement&nbsp;:</span>
+                    <span className="px-2 py-1 rounded-md bg-orange/10 text-orange font-medium">Revolut (préféré)</span>
+                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">TWINT</span>
+                  </div>
+                </div>
+
+                {/* Annuel (mis en avant) */}
+                <div className="relative rounded-xl border border-orange/60 bg-white dark:bg-gray-900 p-5 ring-1 ring-orange/20">
+                  <span className="absolute -top-3 right-3 text-[10px] uppercase tracking-wide bg-orange text-white px-2 py-1 rounded-md shadow">Le plus avantageux</span>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-orange/10 text-orange">Annuel</span>
+                  </div>
+                  <div className="flex items-end gap-1">
+                    <span className="text-3xl font-bold text-orange">100&nbsp;CHF</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">/an</span>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 line-through mt-1">
+                    {(9.90 * 12).toFixed(2)}&nbsp;CHF
+                  </div>
+                  <div className="mt-4 flex items-center gap-2 text-xs">
+                    <span className="text-gray-600 dark:text-gray-300">Paiement&nbsp;:</span>
+                    <span className="px-2 py-1 rounded-md bg-orange/10 text-orange font-medium">Revolut (préféré)</span>
+                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">TWINT</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div>
             {/* Afficher chaque utilisateur et sa date d'expiration de l'abonnement */}
             <h2 className="text-lg font-bold mb-4 text-center">Abonnements aux brunchs actifs</h2>
@@ -408,7 +471,7 @@ export default function Brunch() {
                 </div>
               ))
               ) : (
-                users.map(user => {
+                getDisplayUsers().map(user => {
                   // Calculer le temps restant
                   const now = new Date();
                   const subscriptionEnd = new Date(user.subscriptionEnd);
