@@ -1,0 +1,88 @@
+[{
+  "_id": {
+    "$oid": "67d9928776cda976ae6570cb"
+  },
+  "name": "Aude",
+  "surname": "Valiton",
+  "email": "eggeraude@sunrise.ch",
+  "subscriptionEnd": {
+    "$date": "2026-07-12"
+  }
+},
+{
+  "_id": {
+    "$oid": "67d9a965e1fdcebbb67c1358"
+  },
+  "name": "Fanny",
+  "surname": "Valiton",
+  "email": "fanny_valiton@icloud.com",
+  "subscriptionEnd": {
+    "$date": "2026-04-27"
+  }
+},
+{
+  "_id": {
+    "$oid": "67d9a974e1fdcebbb67c1359"
+  },
+  "name": "Johan",
+  "surname": "Marguerat",
+  "email": "jo.marguerat@gmail.com",
+  "subscriptionEnd": {
+    "$date": "2026-01-01"
+  }
+},
+{
+  "_id": {
+    "$oid": "67d9a98de1fdcebbb67c135b"
+  },
+  "name": "Noa",
+  "surname": "Hernandez",
+  "email": "fr.keedrox@gmail.com",
+  "subscriptionEnd": {
+    "$date": "2025-09-01"
+  }
+},
+{
+  "_id": {
+    "$oid": "685e4ee2141b2ff14b8988bb"
+  },
+  "name": "Nico",
+  "surname": "Boulenc",
+  "email": "n.boulenc@hotmail.ch",
+  "subscriptionEnd": {
+    "$date": "2026-06-27"
+  }
+},
+{
+  "_id": {
+    "$oid": "688294f46ef5fef196e44413"
+  },
+  "name": "Kimberley",
+  "surname": "Carnal",
+  "email": "carnal.kimberley@gmail.com",
+  "subscriptionEnd": {
+    "$date": "2026-01-02"
+  }
+},
+{
+  "_id": {
+    "$oid": "68b6965bbf93c6be81dc74e4"
+  },
+  "name": "Shana",
+  "surname": "Savoy",
+  "email": "savoy.shana@gmail.com",
+  "subscriptionEnd": {
+    "$date": "2026-09-22"
+  }
+},
+{
+  "_id": {
+    "$oid": "68c1a80fe9933ddb34407791"
+  },
+  "name": "Dylan",
+  "surname": "Montandon",
+  "email": "montandon.dylan@gmail.com",
+  "subscriptionEnd": {
+    "$date": "2026-10-23"
+  }
+}]

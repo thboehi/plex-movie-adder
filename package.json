@@ -6,11 +6,18 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "rebuild:users": "node scripts/rebuild-users.js",
+    "migrate:subscriptions": "node scripts/migrate-subscriptions.js",
+    "subs:stats": "node scripts/subscription-manager.js stats",
+    "subs:list": "node scripts/subscription-manager.js list",
+    "subs:active": "node scripts/subscription-manager.js active",
+    "subs:update": "node scripts/subscription-manager.js update-status"
   },
   "dependencies": {
     "@material-tailwind/react": "^2.1.10",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
     "framer-motion": "^12.4.3",
     "jose": "^5.9.6",
     "mongodb": "^6.13.0",

@@ -2,7 +2,6 @@
 import { NextResponse } from "next/server";
 import { MongoClient, ObjectId } from "mongodb";
 
-
 if (!process.env.MONGODB_URI) {
   throw new Error("Please define the MONGODB_URI environment variable");
 }
@@ -16,83 +15,127 @@ async function connectToDatabase() {
     return { client: cachedClient, db: cachedDb };
   }
 
-  const client = await MongoClient.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  const client = await MongoClient.connect(uri);
   const db = client.db();
   cachedClient = client;
   cachedDb = db;
   return { client, db };
 }
 
-function getIp(request) {
-  return (
-    request.headers.get("x-forwarded-for") ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
-}
-
 export async function POST(request) {
-    try {
-      const { userId, amount, months } = await request.json();
-      const userIdObject = new ObjectId(userId);
-      console.log("Requête reçue:", { userId, amount, months });
-  
-      const { db } = await connectToDatabase();
-      const user = await db.collection("users").findOne({ _id: userIdObject });
-  
-      if (!user) {
-        console.error("Utilisateur non trouvé:", userId);
-        return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
-      }
-  
-      console.log("Utilisateur trouvé:", user);
-  
-      let newExpirationDate;
-      const now = new Date();
-  
-      if (user.subscriptionEnd && new Date(user.subscriptionEnd) > now) {
-        // Ajoute les mois à la date actuelle d'expiration
-        newExpirationDate = new Date(user.subscriptionEnd);
-        console.log("Abonnement en cours, nouvelle date de départ:", newExpirationDate);
-      } else {
-        // Si expiré ou jamais eu d'abonnement, on part d'aujourd'hui
-        newExpirationDate = now;
-        console.log("Aucun abonnement actif, départ aujourd'hui:", newExpirationDate);
-      }
-  
-      // Ajouter les mois
-      newExpirationDate.setMonth(newExpirationDate.getMonth() + parseInt(months, 10));
-      console.log("Nouvelle date d'expiration:", newExpirationDate);
-  
-      // Mettre à jour la date d'expiration de l'utilisateur
-      const updateResult = await db.collection("users").updateOne(
-        { _id: userIdObject },
-        { $set: { subscriptionEnd: newExpirationDate } }
-      );
-  
-      console.log("Résultat de la mise à jour:", updateResult);
-  
-      if (updateResult.modifiedCount === 0) {
-        console.warn("Aucune mise à jour effectuée, vérifiez l'ID utilisateur.");
-      }
-  
-      // Enregistrer le paiement dans brunch
-      const newPayment = {
-        userId,
-        amount,
-        months,
-        paymentDate: now,
-      };
-      const paymentInsertResult = await db.collection("brunch").insertOne(newPayment);
-  
-      console.log("Paiement ajouté:", paymentInsertResult);
-  
-      return NextResponse.json({ success: true, newExpirationDate }, { status: 200 });
-    } catch (error) {
-      console.error("Erreur ajout abonnement:", error);
-      return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  try {
+    const { userId, amount, months } = await request.json();
+    console.log("Requête reçue:", { userId, amount, months });
+
+    // Validation des formules
+    const validSubscriptions = {
+      "3": { amount: 29.90, type: "quarterly" },
+      "12": { amount: 100, type: "annual" }
+    };
+
+    if (!validSubscriptions[months]) {
+      return NextResponse.json({ 
+        error: "Formule invalide. Seulement 3 ou 12 mois autorisés." 
+      }, { status: 400 });
     }
+
+    const { db } = await connectToDatabase();
+    const userIdObject = new ObjectId(userId);
+
+    // Récupérer l'utilisateur
+    const user = await db.collection("users").findOne({ _id: userIdObject });
+    if (!user) {
+      console.error("Utilisateur non trouvé:", userId);
+      return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
+    }
+
+    console.log("Utilisateur trouvé:", user.name, user.surname);
+
+    const now = new Date();
+    const monthsNum = parseInt(months, 10);
+    const subscriptionConfig = validSubscriptions[months];
+    
+    // Calculer la nouvelle date d'expiration
+    let newExpiresAt;
+    const currentExpiresAt = user.subscription?.expiresAt 
+      ? new Date(user.subscription.expiresAt) 
+      : null;
+
+    if (currentExpiresAt && currentExpiresAt > now) {
+      // Prolonger à partir de la date actuelle d'expiration
+      newExpiresAt = new Date(currentExpiresAt);
+      newExpiresAt.setMonth(newExpiresAt.getMonth() + monthsNum);
+      console.log("Prolongation depuis:", currentExpiresAt.toLocaleDateString());
+    } else {
+      // Nouvelle souscription à partir d'aujourd'hui
+      newExpiresAt = new Date(now);
+      newExpiresAt.setMonth(newExpiresAt.getMonth() + monthsNum);
+      console.log("Nouvelle souscription depuis aujourd'hui");
+    }
+
+    console.log("Nouvelle expiration:", newExpiresAt.toLocaleDateString());
+
+    // Créer l'entrée d'historique
+    const historyEntry = {
+      date: now,
+      amount: parseFloat(amount),
+      type: subscriptionConfig.type,
+      months: monthsNum,
+      expiresAt: newExpiresAt
+    };
+
+    // Mettre à jour l'utilisateur avec la structure simple
+    const updateResult = await db.collection("users").updateOne(
+      { _id: userIdObject },
+      {
+        $set: {
+          "subscription.expiresAt": newExpiresAt,
+          "subscription.isActive": true,
+          "subscription.currentType": subscriptionConfig.type,
+          "subscription.lastPaymentDate": now,
+          "subscription.lastPaymentAmount": parseFloat(amount),
+          "updatedAt": now
+        },
+        $push: {
+          "subscription.history": historyEntry
+        }
+      }
+    );
+
+    console.log("Résultat mise à jour:", updateResult);
+
+    if (updateResult.modifiedCount === 0 && updateResult.matchedCount === 0) {
+      // L'utilisateur n'a pas de structure subscription, on l'initialise
+      await db.collection("users").updateOne(
+        { _id: userIdObject },
+        {
+          $set: {
+            subscription: {
+              expiresAt: newExpiresAt,
+              isActive: true,
+              currentType: subscriptionConfig.type,
+              lastPaymentDate: now,
+              lastPaymentAmount: parseFloat(amount),
+              history: [historyEntry]
+            },
+            updatedAt: now
+          }
+        }
+      );
+      console.log("Structure subscription initialisée");
+    }
+
+    return NextResponse.json({ 
+      success: true,
+      expiresAt: newExpiresAt,
+      type: subscriptionConfig.type,
+      isActive: true
+    }, { status: 200 });
+
+  } catch (error) {
+    console.error("Erreur ajout abonnement:", error);
+    return NextResponse.json({ 
+      error: "Erreur serveur: " + error.message 
+    }, { status: 500 });
   }
+}

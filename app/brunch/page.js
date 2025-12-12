@@ -18,7 +18,7 @@ export default function Brunch() {
   const [modalStep, setModalStep] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState("");
-  const [paymentData, setPaymentData] = useState({ amount: "", months: "1" });
+  const [paymentData, setPaymentData] = useState({ amount: "", months: "3" });
   const [newUser, setNewUser] = useState({ name: "", surname: "", email: "" });
   
 
@@ -125,7 +125,7 @@ export default function Brunch() {
     setIsModalOpen(false);
     setModalStep(1);
     setSelectedUser("");
-    setPaymentData({ amount: "", months: "1" });
+    setPaymentData({ amount: "", months: "3" });
     setNewUser({ name: "", surname: "", email: "" });
   }
 
@@ -312,7 +312,7 @@ export default function Brunch() {
                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
-                          Ajouter l'utilisateur
+                          Ajouter l&apos;utilisateur
                         </button>
                       </div>
                     </div>
@@ -354,13 +354,13 @@ export default function Brunch() {
                           }}
                           color="amber"
                         >
-                          <Option value="1" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                          <Option value="3" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
                             <div className="flex items-center gap-2">
                               <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                <Typography className="font-bold text-xs">1</Typography>
+                                <Typography className="font-bold text-xs">3</Typography>
                               </div>
                               <Typography className="font-normal">
-                                1 mois d'abonnement
+                                3 mois (29.90 CHF)
                               </Typography>
                             </div>
                           </Option>
@@ -371,7 +371,7 @@ export default function Brunch() {
                                 <Typography className="font-bold text-xs text-orange">12</Typography>
                               </div>
                               <Typography className="font-normal">
-                                12 mois d'abonnement
+                                12 mois (100 CHF)
                               </Typography>
                             </div>
                           </Option>
@@ -408,14 +408,17 @@ export default function Brunch() {
             <div className="w-full max-w-2xl mx-auto mb-10">
               <h2 className="sr-only">Tarifs</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Mensuel */}
+                {/* Trimestriel */}
                 <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">Mensuel</span>
+                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">Trimestriel</span>
                   </div>
                   <div className="flex items-end gap-1">
-                    <span className="text-3xl font-bold text-gray-900 dark:text-white">9.90&nbsp;CHF</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">/mois</span>
+                    <span className="text-3xl font-bold text-gray-900 dark:text-white">29.90&nbsp;CHF</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">/3 mois</span>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Soit 9.97&nbsp;CHF/mois
                   </div>
                   <div className="mt-4 flex items-center gap-2 text-xs">
                     <span className="text-gray-600 dark:text-gray-300">Paiement&nbsp;:</span>
@@ -435,7 +438,10 @@ export default function Brunch() {
                     <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">/an</span>
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 line-through mt-1">
-                    {(9.90 * 12).toFixed(2)}&nbsp;CHF
+                    {(29.90 * 4).toFixed(2)}&nbsp;CHF
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Soit 8.33&nbsp;CHF/mois
                   </div>
                   <div className="mt-4 flex items-center gap-2 text-xs">
                     <span className="text-gray-600 dark:text-gray-300">Paiement&nbsp;:</span>

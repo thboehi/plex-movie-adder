@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🎬 Plex Movie Adder
 
-## Getting Started
+Système de gestion d'abonnements pour le serveur Plex avec interface d'administration.
 
-First, run the development server:
+## 🚀 Quick Start
 
 ```bash
+# Installation
+npm install
+
+# Configuration
+cp .env.example .env.local
+# Éditer .env.local avec vos valeurs
+
+# Migration des données (première fois)
+npm run migrate:subscriptions
+
+# Lancer l'application
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 📚 Documentation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **[QUICKSTART.md](./QUICKSTART.md)** - Démarrage rapide
+- **[MIGRATION.md](./MIGRATION.md)** - Guide de migration des données
+- **[SUBSCRIPTIONS.md](./SUBSCRIPTIONS.md)** - Architecture complète
+- **[SUMMARY.md](./SUMMARY.md)** - Résumé des modifications
 
-## Learn More
+## 💰 Formules d'abonnement
 
-To learn more about Next.js, take a look at the following resources:
+| Formule | Durée | Prix | Prix/mois |
+|---------|-------|------|-----------|
+| **Trimestrielle** | 3 mois | 29.90 CHF | 9.97 CHF |
+| **Annuelle** | 12 mois | 100 CHF | 8.33 CHF |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Commandes utiles
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Développement
+```bash
+npm run dev          # Serveur de développement
+npm run build        # Build production
+npm run start        # Serveur production
+npm run lint         # Linter
+```
 
-## Deploy on Vercel
+### Gestion des abonnements
+```bash
+npm run subs:stats   # Statistiques
+npm run subs:list    # Liste des abonnements
+npm run subs:active  # Abonnements actifs
+npm run subs:update  # Mise à jour des statuts
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🏗️ Architecture
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Collections MongoDB
+
+**users** - Informations utilisateurs
+- name, surname, email
+- currentSubscriptionEnd (date d'expiration)
+
+**subscriptions** - Historique des abonnements
+- userId, type, amount
+- startDate, endDate, status
+- Traçabilité complète
+
+**brunch** - Legacy (conservé pour l'audit)
+
+### Routes API
+
+- `GET /api/users` - Liste des utilisateurs
+- `POST /api/users` - Créer un utilisateur
+- `GET /api/subscriptions` - Récupérer les abonnements
+- `PATCH /api/subscriptions` - Mettre à jour les statuts
+- `POST /api/brunch/add` - Ajouter un paiement
+
+## 🔐 Authentification
+
+- **Admin** : Accès complet, gestion des paiements
+- **Utilisateur** : Vue limitée de ses abonnements
+
+## 🎨 Stack technique
+
+- **Framework** : [Next.js](https://nextjs.org) 15.2
+- **UI** : React 19 + [Material Tailwind](https://www.material-tailwind.com/)
+- **Styling** : [Tailwind CSS](https://tailwindcss.com)
+- **Database** : MongoDB
+- **Auth** : JWT (jose)
+
+## 📝 Notes
+
+- Migration non-destructive des anciennes données
+- Système de filtrage et tri automatique
+- Badges de statut (actif, expire bientôt, expiré)
+- Interface responsive dark/light mode
+
+---
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
