@@ -68,7 +68,7 @@ function isExactRouteMatch(pathname, route) {
   return pathname.startsWith(route);
 }
 
-export async function middleware(request) {
+export default async function proxy(request) {
   const { pathname } = request.nextUrl;
   
   // Extraire le token
