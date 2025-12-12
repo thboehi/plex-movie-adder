@@ -16,11 +16,8 @@ async function connectToDatabase() {
     return { client: cachedClient, db: cachedDb };
   }
 
-  const client = await MongoClient.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  const db = client.db(); // Utilise la base de données définie dans l'URI
+  const client = await MongoClient.connect(uri);
+  const db = client.db();
   cachedClient = client;
   cachedDb = db;
   return { client, db };
@@ -39,20 +36,43 @@ export async function GET(req, res) {
     try {
         const { db } = await connectToDatabase();
         
-        // Utiliser la projection MongoDB pour ne renvoyer que les champs spécifiés
+        // Récupérer les utilisateurs avec la nouvelle structure
         const users = await db.collection("users").find({}, {
-        projection: {
-            _id: 1,       // Inclure l'ID
-            name: 1,      // Inclure le prénom
-            subscriptionEnd: 1  // Inclure la date d'expiration
-        }
+          projection: {
+            _id: 1,
+            name: 1,
+            "subscription.expiresAt": 1,
+            "subscription.isActive": 1
+          }
         }).toArray();
 
-        // Ajouter un champ surname masqué pour chaque utilisateur
-        const maskedUsers = users.map(user => ({
-            ...user,
-            surname: "****",  // Ajouter un champ surname masqué
-            info: "Certaines données ont été protégées pour des raisons de confidentialités. Les informations sensibles ne sont accessibles qu'aux administrateurs."
+        // Trier par date d'expiration
+        const currentDate = new Date();
+        const sortedUsers = users.sort((a, b) => {
+          const dateA = a.subscription?.expiresAt ? new Date(a.subscription.expiresAt) : new Date(0);
+          const dateB = b.subscription?.expiresAt ? new Date(b.subscription.expiresAt) : new Date(0);
+          
+          const isPastA = dateA < currentDate;
+          const isPastB = dateB < currentDate;
+          
+          if (isPastA && isPastB) {
+            return dateA - dateB;
+          } else if (isPastA) {
+            return 1;
+          } else if (isPastB) {
+            return -1;
+          } else {
+            return dateA - dateB;
+          }
+        });
+
+        // Masquer les données sensibles et ajouter rétrocompatibilité
+        const maskedUsers = sortedUsers.map(user => ({
+            _id: user._id,
+            name: user.name,
+            surname: "****",
+            subscriptionEnd: user.subscription?.expiresAt || null,  // Rétrocompatibilité
+            info: "Certaines données ont été protégées pour des raisons de confidentialité. Les informations sensibles ne sont accessibles qu'aux administrateurs."
         }));
         
         return NextResponse.json(maskedUsers);
