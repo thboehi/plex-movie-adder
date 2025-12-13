@@ -13,6 +13,7 @@ export default function Home() {
 
   const [authenticated, setAuthenticated] = useState(false);
   const [adminAuthenticated, setAdminAuthenticated] = useState(false);
+  const [refreshAddedMovies, setRefreshAddedMovies] = useState(0);
 
   const [loading, setLoading] = useState(true);
 
@@ -72,8 +73,11 @@ export default function Home() {
         <Hero adminAuthenticated={adminAuthenticated} subtitle="Movie Adder" />
         
         {/* Contenu principal */}
-        <ListMovies adminAuthenticated={adminAuthenticated} />
-        <AddedMovies />
+        <ListMovies 
+          adminAuthenticated={adminAuthenticated}
+          onMovieDeleted={() => setRefreshAddedMovies(prev => prev + 1)}
+        />
+        <AddedMovies refreshTrigger={refreshAddedMovies} />
         <div className="m-20 p-10 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
           <p className="text-gray-400 dark:text-gray-700">Site web créé et maintenu par{" "}
             <a className="group text-orange font-bold transition-all hover:underline" href="https://thbo.ch" target="_blank">

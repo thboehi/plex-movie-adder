@@ -9,6 +9,7 @@
     "lint": "next lint",
     "rebuild:users": "node scripts/rebuild-users.js",
     "migrate:subscriptions": "node scripts/migrate-subscriptions.js",
+    "setup:indexes": "node scripts/setup-indexes.js",
     "subs:stats": "node scripts/subscription-manager.js stats",
     "subs:list": "node scripts/subscription-manager.js list",
     "subs:active": "node scripts/subscription-manager.js active",

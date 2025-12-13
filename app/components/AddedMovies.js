@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { formatDistance } from "date-fns";
 import { fr } from "date-fns/locale";
 
-export default function AddedMovies() {
+export default function AddedMovies({ refreshTrigger }) {
   const [addedMovies, setAddedMovies] = useState([]);
   const [loadingAddedMovies, setLoadingAddedMovies] = useState(true);
   const [visibleCount, setVisibleCount] = useState(5);
@@ -30,7 +30,7 @@ export default function AddedMovies() {
     };
 
     fetchAddedMovies();
-  }, []);
+  }, [refreshTrigger]);
 
   return (
     <div className="w-full mt-8">

@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 dark:bg-black`}
       >
         {children}
-        <script src="https://thbo.ch/credits.js"/>
+        <script src="https://thbo.ch/credits.js" async />
       </body>
     </html>
   );

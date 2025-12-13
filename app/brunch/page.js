@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import LoginForm from "../components/LoginForm";
 import DecryptedText from '../components/DecryptedText';
 import Hero from "../components/Hero";
@@ -44,6 +45,7 @@ export default function Brunch() {
     if (authenticated) {
       fetchUsers();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated]);
 
   async function fetchUsers() {
@@ -71,8 +73,11 @@ export default function Brunch() {
         return;
     }
     
+    // Optimistic update - rafraîchir immédiatement l'UI
+    const previousUsers = users;
+    
     try {
-      await fetch("/api/brunch/add", {
+      const response = await fetch("/api/brunch/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,9 +86,18 @@ export default function Brunch() {
           months: paymentData.months,
         }),
       });
-      closeModal();
+      
+      if (response.ok) {
+        // Rafraîchir les données utilisateur
+        await fetchUsers();
+        closeModal();
+      } else {
+        console.error("Erreur ajout paiement");
+        setUsers(previousUsers);
+      }
     } catch (error) {
       console.error("Erreur ajout paiement", error);
+      setUsers(previousUsers);
     }
   }
 
@@ -477,40 +491,51 @@ export default function Brunch() {
                 </div>
               ))
               ) : (
-                getDisplayUsers().map(user => {
-                  // Calculer le temps restant
-                  const now = new Date();
-                  const subscriptionEnd = new Date(user.subscriptionEnd);
-                  const timeRemaining = subscriptionEnd - now;
-                  const daysRemaining = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-                  const hoursRemaining = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                  
-                  // Vérifier si l'abonnement se termine dans 7 jours ou moins
-                  const isAboutToExpire = daysRemaining <= 7;
-                  
-                  // Construire le message du temps restant
-                  let timeRemainingMessage;
-                  if (daysRemaining < 0) {
-                      timeRemainingMessage = "Abonnement expiré";
-                  } else if (isAboutToExpire) {
-                      timeRemainingMessage = `Abonnement se termine dans ${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''} et ${hoursRemaining} heure${hoursRemaining !== 1 ? 's' : ''}`;
-                  } else {
-                      timeRemainingMessage = "Abonnement jusqu'au";
-                  }
-                  
-                  return (
-                      <div 
-                      key={user._id} 
-                      className={`flex flex-col w-full items-center bg-white border ${isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200'} dark:bg-gray-900 ${!isAboutToExpire ? 'dark:border-gray-800' : ''} p-4 rounded-md text-sm transition-all hover:scale-105`}
+                <AnimatePresence mode="popLayout">
+                  {getDisplayUsers().map((user, index) => {
+                    // Calculer le temps restant
+                    const now = new Date();
+                    const subscriptionEnd = new Date(user.subscriptionEnd);
+                    const timeRemaining = subscriptionEnd - now;
+                    const daysRemaining = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                    const hoursRemaining = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    
+                    // Vérifier si l'abonnement se termine dans 7 jours ou moins
+                    const isAboutToExpire = daysRemaining <= 7;
+                    
+                    // Construire le message du temps restant
+                    let timeRemainingMessage;
+                    if (daysRemaining < 0) {
+                        timeRemainingMessage = "Abonnement expiré";
+                    } else if (isAboutToExpire) {
+                        timeRemainingMessage = `Abonnement se termine dans ${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''} et ${hoursRemaining} heure${hoursRemaining !== 1 ? 's' : ''}`;
+                    } else {
+                        timeRemainingMessage = "Abonnement jusqu'au";
+                    }
+                    
+                    return (
+                      <motion.div 
+                        key={user._id}
+                        layout
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ 
+                          duration: 0.3,
+                          delay: index * 0.05,
+                          layout: { duration: 0.2 }
+                        }}
+                        className={`flex flex-col w-full items-center bg-white border ${isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200'} dark:bg-gray-900 ${!isAboutToExpire ? 'dark:border-gray-800' : ''} p-4 rounded-md text-sm transition-all hover:scale-105`}
                       >
-                      <p className="text-xl font-bold">{user.name} {user.surname}</p>
-                      <p className={`text-xs mt-3 ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>{timeRemainingMessage}</p>
-                      <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
+                        <p className="text-xl font-bold">{user.name} {user.surname}</p>
+                        <p className={`text-xs mt-3 ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>{timeRemainingMessage}</p>
+                        <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
                           {isAboutToExpire ? '' : new Date(user.subscriptionEnd).toLocaleDateString()}
-                      </p>
-                      </div>
-                  );
-                  })
+                        </p>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
               )}
             </div>
             </div>

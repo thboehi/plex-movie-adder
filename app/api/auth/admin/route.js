@@ -1,31 +1,7 @@
 // app/api/auth/admin/route.js
 import { NextResponse } from "next/server";
 import { SignJWT } from "jose";
-import { MongoClient } from "mongodb";
-
-// Vérifiez que la variable d'environnement est définie
-if (!process.env.MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable");
-}
-
-const uri = process.env.MONGODB_URI;
-let cachedClient = null;
-let cachedDb = null;
-
-// Fonction de connexion à MongoDB (avec mise en cache)
-async function connectToDatabase() {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
-  const client = await MongoClient.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  const db = client.db(); // Utilise la base de données définie dans l'URI
-  cachedClient = client;
-  cachedDb = db;
-  return { client, db };
-}
+import { connectToDatabase } from "@/app/utils/db";
 
 // Fonction utilitaire pour récupérer l'IP du client depuis les headers
 function getIp(request) {
@@ -45,13 +21,12 @@ export async function POST(request) {
   const timestamp = new Date();
   const loginSuccessful = password === process.env.ADMIN_ACCESS_PASSWORD;
 
-  // Enregistrement de la tentative de connexion dans la collection d'audit,
-  // en enregistrant le mot de passe tenté et le résultat (success)
+  // Enregistrement de la tentative de connexion dans la collection d'audit
+  // Note: On ne stocke JAMAIS le mot de passe pour des raisons de sécurité
   try {
     const { db } = await connectToDatabase();
     await db.collection("audit_logs").insertOne({
-      event: "login_attempt",
-      attempted_password: password,
+      event: "login_attempt_admin",
       ip,
       userAgent,
       timestamp,
@@ -63,11 +38,11 @@ export async function POST(request) {
   }
 
   if (loginSuccessful) {
-    // Création du token JWT qui expire dans 7 jours
+    // Création du token JWT qui expire dans 365 jours
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const token = await new SignJWT({ authenticated: true, adminAuthenticated: true })
       .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("30d")
+      .setExpirationTime("365d")
       .sign(secret);
 
     const response = NextResponse.json({ success: true });
@@ -75,13 +50,13 @@ export async function POST(request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 jours
+      maxAge: 60 * 60 * 24 * 365, // 365 jours
     });
     response.cookies.set("lastLoginAs", "admin", {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 jours
+      maxAge: 60 * 60 * 24 * 365, // 365 jours
     });
     return response;
   }

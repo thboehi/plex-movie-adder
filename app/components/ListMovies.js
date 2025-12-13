@@ -2,29 +2,65 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
-const DELETE_PASSWORD = process.env.NEXT_PUBLIC_DELETE_PASSWORD;
-// Ouiiii je sais qu'un dev va pouvoir trouver ce mot de passe... Et je sais que c'est risqué.. Mais les gars c'est un site entre pote non detcheu. Celui qui s'embête à venir nous enquiquiner avec ça... je le plains sincèrement et je suis désolé pour lui que sa mère ne l'ait pas assez aimée. Zbeub
+// Lazy loading des composants Material Tailwind (uniquement pour le modal)
+const Select = dynamic(() => import("@material-tailwind/react").then(mod => mod.Select), { ssr: false });
+const Option = dynamic(() => import("@material-tailwind/react").then(mod => mod.Option), { ssr: false });
+const Typography = dynamic(() => import("@material-tailwind/react").then(mod => mod.Typography), { ssr: false });
+
 const YGG_DOMAIN = process.env.NEXT_PUBLIC_YGG_DOMAIN;
 
-export default function ListMovies( { adminAuthenticated } ) {
+export default function ListMovies( { adminAuthenticated, onMovieDeleted } ) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [listMovies, setListMovies] = useState([]);
   const [loadingListMovies, setLoadingListMovies] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [addingMovie, setAddingMovie] = useState(false);
   
 
-  // Chargement des films persistés au montage
+  // Chargement des films persistés au montage avec cache localStorage
   useEffect(() => {
+    const CACHE_KEY = 'plex_movies_cache';
+    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    
     const fetchMovies = async () => {
-      setLoadingListMovies(true);
+      // 1. Essayer de charger depuis le cache
+      try {
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        if (cachedData) {
+          const { movies, timestamp } = JSON.parse(cachedData);
+          const now = Date.now();
+          
+          // Si le cache est récent (< 5 min), l'afficher immédiatement
+          if (now - timestamp < CACHE_DURATION) {
+            setListMovies(movies);
+            setLoadingListMovies(false);
+            // Continue quand même à revalider en arrière-plan
+          }
+        }
+      } catch (error) {
+        console.error("Erreur cache localStorage:", error);
+      }
+      
+      // 2. Récupérer les données fraîches
       try {
         const response = await fetch("/api/movies");
         if (response.ok) {
           const data = await response.json();
           setListMovies(data);
+          
+          // 3. Mettre à jour le cache
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+              movies: data,
+              timestamp: Date.now()
+            }));
+          } catch (error) {
+            console.error("Erreur sauvegarde cache:", error);
+          }
         } else {
           console.error("Erreur lors du chargement des films persistés");
         }
@@ -37,7 +73,7 @@ export default function ListMovies( { adminAuthenticated } ) {
     fetchMovies();
   }, []);
 
-  // Recherche avec debounce
+  // Recherche avec debounce et AbortController
   useEffect(() => {
     if (!query) {
       setResults([]);
@@ -45,9 +81,13 @@ export default function ListMovies( { adminAuthenticated } ) {
       return;
     }
 
+    const controller = new AbortController();
     setLoading(true);
+    
     const timeoutId = setTimeout(() => {
-      fetch(`https://www.omdbapi.com/?apikey=a2ca920d&s=${query}`)
+      fetch(`https://www.omdbapi.com/?apikey=a2ca920d&s=${query}`, {
+        signal: controller.signal
+      })
         .then((res) => res.json())
         .then((data) => {
           if (data.Search) {
@@ -56,61 +96,121 @@ export default function ListMovies( { adminAuthenticated } ) {
             setResults([]);
           }
         })
-        .catch((err) =>
-          console.error("Erreur lors de l'appel à l'API OMDb:", err)
-        )
+        .catch((err) => {
+          // Ne pas logger les erreurs d'annulation
+          if (err.name !== 'AbortError') {
+            console.error("Erreur lors de l'appel à l'API OMDb:", err);
+          }
+        })
         .finally(() => setLoading(false));
     }, 300);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort(); // Annule la requête en cours
+    };
   }, [query]);
 
-  // Mise à jour de handleAddMovie pour persister via l'API
+  // Optimistic update : ajout immédiat du film dans l'UI
   const handleAddMovie = async (movie) => {
     // Si le film n'est pas déjà présent
-    if (!listMovies.some((m) => m.imdbID === movie.imdbID)) {
-      setAddingMovie(true); // Active l'overlay de chargement
-      try {
-        const response = await fetch("/api/movies", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(movie),
-        });
-        if (response.ok) {
-          const savedMovie = await response.json();
-          setListMovies((prev) => [...prev, savedMovie]);
-        } else {
-          console.error("Erreur lors de l'enregistrement du film");
-        }
-      } catch (error) {
-        console.error("Erreur lors de l'enregistrement du film :", error);
-      }
+    if (listMovies.some((m) => m.imdbID === movie.imdbID)) {
+      return;
     }
-    setAddingMovie(false); // Désactive l'overlay une fois terminé
-    // Réinitialise la recherche et les résultats
+
+    // 1. Ajout optimiste - le film apparaît IMMÉDIATEMENT
+    const optimisticMovie = {
+      ...movie,
+      _optimistic: true, // Marqueur pour l'affichage
+      deleted: false,
+      added_date: new Date()
+    };
+    
+    setListMovies((prev) => [...prev, optimisticMovie]);
     setQuery("");
     setResults([]);
+
+    // 2. Sauvegarde en arrière-plan
+    try {
+      const response = await fetch("/api/movies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(movie),
+      });
+      
+      if (response.ok) {
+        const savedMovie = await response.json();
+        // Remplacer le film optimiste par le film confirmé
+        setListMovies((prev) => {
+          const updatedMovies = prev.map((m) =>
+            m.imdbID === movie.imdbID && m._optimistic ? savedMovie : m
+          );
+          
+          // Mettre à jour le cache localStorage
+          try {
+            localStorage.setItem('plex_movies_cache', JSON.stringify({
+              movies: updatedMovies,
+              timestamp: Date.now()
+            }));
+          } catch (error) {
+            console.error("Erreur mise à jour cache:", error);
+          }
+          
+          return updatedMovies;
+        });
+      } else {
+        // En cas d'erreur, retirer le film optimiste
+        console.error("Erreur lors de l'enregistrement du film");
+        setListMovies((prev) => prev.filter((m) => m.imdbID !== movie.imdbID));
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement du film :", error);
+      // Retirer le film optimiste en cas d'erreur réseau
+      setListMovies((prev) => prev.filter((m) => m.imdbID !== movie.imdbID));
+    }
   };
 
-  // Mise à jour de handleDeleteMovie pour supprimer via l'API
+  // Optimistic update : suppression immédiate de l'UI
   const handleDeleteMovie = async (movie) => {
     if (!adminAuthenticated) {
       alert("Vous devez être admin pour supprimer un film");
       return;
     }
+    
+    // 1. Suppression optimiste - disparaît IMMÉDIATEMENT
+    const previousMovies = listMovies;
+    const updatedMovies = listMovies.filter((m) => m.imdbID !== movie.imdbID);
+    setListMovies(updatedMovies);
+    
+    // 2. Confirmation en arrière-plan
     try {
       const response = await fetch(`/api/movies?imdbID=${movie.imdbID}`, {
         method: "DELETE",
       });
+      
       if (response.ok) {
-        setListMovies((prev) =>
-          prev.filter((m) => m.imdbID !== movie.imdbID)
-        );
-      } else {
+        // Mettre à jour le cache localStorage
+        try {
+          localStorage.setItem('plex_movies_cache', JSON.stringify({
+            movies: updatedMovies,
+            timestamp: Date.now()
+          }));
+        } catch (error) {
+          console.error("Erreur mise à jour cache:", error);
+        }
+        // Déclencher le refresh de la liste des films ajoutés
+        if (onMovieDeleted) {
+          onMovieDeleted();
+        }
+      } else if (!response.ok) {
+        // En cas d'erreur, restaurer le film
         console.error("Erreur lors de la suppression du film");
+        setListMovies(previousMovies);
       }
     } catch (error) {
       console.error("Erreur lors de la suppression du film :", error);
+      // Restaurer en cas d'erreur réseau
+      setListMovies(previousMovies);
     }
   };
 
@@ -139,31 +239,51 @@ export default function ListMovies( { adminAuthenticated } ) {
             </div>
           ) : (
             results.length > 0 && (
-              <div className="flex flex-wrap gap-4 justify-center">
-                {results.map((movie) => (
-                  <div
-                    key={movie.imdbID}
-                    onClick={() => handleAddMovie(movie)}
-                    className="cursor-pointer border border-gray-300 rounded-lg overflow-hidden w-32 text-center shadow transition-all duration-200 hover:scale-105 hover:border-orange hover:shadow-lg"
-                  >
-                    {movie.Poster && movie.Poster !== "N/A" ? (
-                      <img
-                        src={movie.Poster}
-                        alt={movie.Title}
-                        className="w-full h-44 object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-44 bg-gray-200 flex items-center justify-center">
-                        Pas d'image
+              <motion.div 
+                className="flex flex-wrap gap-4 justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              >
+                <AnimatePresence mode="popLayout">
+                  {results.map((movie, index) => (
+                    <motion.div
+                      key={movie.imdbID}
+                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ 
+                        duration: 0.3,
+                        delay: index * 0.05, // Stagger effect
+                        ease: "easeOut"
+                      }}
+                      onClick={() => handleAddMovie(movie)}
+                      className="cursor-pointer border border-gray-300 rounded-lg overflow-hidden w-32 text-center shadow transition-all duration-200 hover:scale-105 hover:border-orange hover:shadow-lg"
+                    >
+                      {movie.Poster && movie.Poster !== "N/A" ? (
+                        <div className="relative w-full h-44">
+                          <Image
+                            src={movie.Poster}
+                            alt={movie.Title}
+                            fill
+                            className="object-cover"
+                            sizes="128px"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-full h-44 bg-gray-200 flex items-center justify-center">
+                          Pas d&apos;image
+                        </div>
+                      )}
+                      <div className="p-2">
+                        <h3 className="text-sm font-semibold">{movie.Title}</h3>
+                        <p className="text-xs text-gray-500">{movie.Year}</p>
                       </div>
-                    )}
-                    <div className="p-2">
-                      <h3 className="text-sm font-semibold">{movie.Title}</h3>
-                      <p className="text-xs text-gray-500">{movie.Year}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
             )
           )}
         </div>
@@ -172,52 +292,93 @@ export default function ListMovies( { adminAuthenticated } ) {
       {/* Section des films ajoutés */}
       <div className="w-full">
         <h2 className="text-2xl font-semibold mb-4 text-center">
-          Films et séries dans la liste d'attente
+          Films et séries dans la liste d&apos;attente
         </h2>
         {loadingListMovies ? (
           <div className="flex flex-wrap gap-3 justify-center">
-            {[...Array(4)].map((_, index) => (
+            {[...Array(6)].map((_, index) => (
               <div
                 key={index}
-                className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 h-64 text-center shadow bg-gray-200 dark:bg-gray-700"
+                className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                {/* Image skeleton */}
+                <div className="relative w-full h-56 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                </div>
+                {/* Text skeleton */}
+                <div className="p-2 space-y-2">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mx-auto w-24 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                  </div>
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mx-auto w-12 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         ) : listMovies.length === 0 ? (
-          <p className="text-center text-gray-500">Aucun film dans la liste d'attente</p>
+          <p className="text-center text-gray-500">Aucun film dans la liste d&apos;attente</p>
         ) : (
-          <div className="flex flex-wrap gap-3 justify-center">
-            {listMovies.map((movie) => (
-              <div
-                key={movie.imdbID}
-                className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow transition-all hover:scale-105 hover:shadow-xl"
-              >
-                {movie.Poster && movie.Poster !== "N/A" ? (
-                  <img
-                    src={movie.Poster}
-                    alt={movie.Title}
-                    className="w-full h-56 object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-56 bg-gray-200 flex items-center justify-center">
-                    Pas d'image
+          <motion.div 
+            className="flex flex-wrap gap-3 justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <AnimatePresence mode="popLayout">
+              {listMovies.map((movie, index) => (
+                <motion.div
+                  key={movie.imdbID}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ 
+                    opacity: movie._optimistic ? 0.6 : 1, // Film en cours d'ajout légèrement transparent
+                    scale: 1, 
+                    y: 0 
+                  }}
+                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                  transition={{ 
+                    duration: 0.3,
+                    delay: index * 0.03,
+                    layout: { duration: 0.3 }
+                  }}
+                  className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow transition-all hover:scale-105 hover:shadow-xl"
+                >
+                  {movie.Poster && movie.Poster !== "N/A" ? (
+                    <div className="relative w-full h-56">
+                      <Image
+                        src={movie.Poster}
+                        alt={movie.Title}
+                        fill
+                        className="object-cover"
+                        sizes="160px"
+                        loading="lazy"
+                        placeholder="blur"
+                        blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTYwIiBoZWlnaHQ9IjIyNCIgZmlsbD0iI2UwZTBlMCIvPjwvc3ZnPg=="
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-56 bg-gray-200 flex items-center justify-center">
+                      Pas d&apos;image
+                    </div>
+                  )}
+                  <div className="p-2">
+                    <h3 className="text-base font-semibold">{movie.Title}</h3>
+                    <p className="text-sm text-gray-500">{movie.Year}</p>
                   </div>
-                )}
-                <div className="p-2">
-                  <h3 className="text-base font-semibold">{movie.Title}</h3>
-                  <p className="text-sm text-gray-500">{movie.Year}</p>
-                </div>
-                {/* Bouton Supprimer en haut à gauche */}
+                {/* Indicateur "Ajouté" en haut à droite */}
                 {adminAuthenticated && (
                   <button
                   onClick={() => handleDeleteMovie(movie)}
-                  className="group absolute top-2 -right-2 hover:right-0 bg-red-500 opacity-10 text-white text-xs p-2 rounded-l transition-all hover:bg-red-600 hover:opacity-100"
+                  className="group absolute top-2 -right-2 hover:right-0 bg-green-500 opacity-20 text-white text-xs p-2 rounded-l transition-all hover:w-3/4 hover:bg-green-600 hover:opacity-100"
                 >
-                  <span className="block">
-                    <img src="/trash.svg" alt="Supprimer" className="w-4 h-4" />
+                  <span className="block group-hover:hidden">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
                   </span>
+                  <span className="hidden group-hover:block" style={{fontSize: 10, fontWeight: 700}}>Marquer comme ajouté</span>
                 </button>
                 )}
                 
@@ -227,12 +388,12 @@ export default function ListMovies( { adminAuthenticated } ) {
                   href={`https://www.imdb.com/title/${movie.imdbID}/`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group absolute top-2 -left-2 hover:left-0 bg-imdb-yellow text-gray-700 text-xs p-2 rounded-r transition-all opacity-10 hover:opacity-100"
+                  className="group absolute top-2 -left-2 hover:left-0 bg-imdb-yellow text-gray-700 text-xs p-2 rounded-r transition-all opacity-10 hover:w-3/4 hover:opacity-100"
                 >
                   <span className="block group-hover:hidden">
-                    <img src="/link.svg" alt="Voir plus" className="w-4 h-4" />
+                    <Image src="/link.svg" alt="Voir plus" width={16} height={16} />
                   </span>
-                  <span className="hidden group-hover:block" style={{fontSize: 10, fontWeight: 900}}>IMDb</span>
+                  <span className="hidden group-hover:block" style={{fontSize: 10, fontWeight: 900}}>Voir la fiche IMDb</span>
                 </a>
 
                 {/* Bouton Recherche en bas à gauche */}
@@ -253,23 +414,19 @@ export default function ListMovies( { adminAuthenticated } ) {
                       className="group absolute top-12 -left-2 hover:left-0 bg-ygg-blue text-gray-700 text-xs p-2 rounded-r transition-all opacity-30 hover:opacity-100"
                     >
                       <span className="block group-hover:hidden">
-                        <img src="/search.svg" alt="Recherche" className="w-4 h-4" />
+                        <Image src="/search.svg" alt="Recherche" width={16} height={16} />
                       </span>
-                      <span className="hidden group-hover:block" style={{fontSize: 10, fontWeight: 700}}>YGG</span>
+                      <span className="hidden group-hover:block" style={{fontSize: 10, fontWeight: 700}}>Rechercher sur YGG</span>
                     </a>
                   );
                 })()}
-              </div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </div>
     </div>
-    {addingMovie && (
-      <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-        <div className="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full"></div>
-      </div>
-    )}
     </>
   );
 }

@@ -1,30 +1,6 @@
 // app/api/movies/route.js
 import { NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
-
-// Vérifiez que la variable d'environnement est bien définie
-if (!process.env.MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable");
-}
-
-const uri = process.env.MONGODB_URI;
-let cachedClient = null;
-let cachedDb = null;
-
-async function connectToDatabase() {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
-
-  const client = await MongoClient.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  const db = client.db(); // Utilise la base de données définie dans l'URI
-  cachedClient = client;
-  cachedDb = db;
-  return { client, db };
-}
+import { connectToDatabase } from "@/app/utils/db";
 
 // Fonction utilitaire pour récupérer l'IP depuis les headers de la requête
 function getIp(request) {
@@ -156,12 +132,22 @@ export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
     const imdbID = searchParams.get("imdbID");
+    
+    // Validation stricte de l'imdbID
     if (!imdbID) {
       return NextResponse.json(
         { error: "Missing imdbID" },
         { status: 400 }
       );
     }
+    
+    if (typeof imdbID !== 'string' || !/^tt\d+$/.test(imdbID)) {
+      return NextResponse.json(
+        { error: "Invalid imdbID format" },
+        { status: 400 }
+      );
+    }
+    
     const ip = getIp(request);
     const deleted_date = new Date();
     const { db } = await connectToDatabase();

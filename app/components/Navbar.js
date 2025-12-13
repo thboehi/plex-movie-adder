@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
 
 export default function Navbar({ current, authenticated, adminAuthenticated }) {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -32,7 +33,13 @@ export default function Navbar({ current, authenticated, adminAuthenticated }) {
             return (
                 <>
                     <li>
-                        <a href={href} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-white dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-orange transition-colors">{text}</a>
+                        <Link 
+                            href={href} 
+                            prefetch={true}
+                            className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-white dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-orange transition-colors"
+                        >
+                            {text}
+                        </Link>
                     </li>
                 </>
             )

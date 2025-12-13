@@ -1,29 +1,7 @@
 // /api/subscriptions/route.js
 import { NextResponse } from "next/server";
-import { MongoClient, ObjectId } from "mongodb";
-
-if (!process.env.MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable");
-}
-
-const uri = process.env.MONGODB_URI;
-let cachedClient = null;
-let cachedDb = null;
-
-async function connectToDatabase() {
-  if (cachedClient && cachedDb) {
-    return { client: cachedClient, db: cachedDb };
-  }
-
-  const client = await MongoClient.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  const db = client.db();
-  cachedClient = client;
-  cachedDb = db;
-  return { client, db };
-}
+import { ObjectId } from "mongodb";
+import { connectToDatabase } from "@/app/utils/db";
 
 /**
  * GET /api/subscriptions
@@ -39,12 +17,12 @@ export async function GET(request) {
     const userId = searchParams.get('userId');
     const status = searchParams.get('status') || 'all';
 
-    let query = {};
+    let matchStage = {};
 
     // Filtre par utilisateur
     if (userId) {
       try {
-        query.userId = new ObjectId(userId);
+        matchStage.userId = new ObjectId(userId);
       } catch (error) {
         return NextResponse.json(
           { error: "ID utilisateur invalide" }, 
@@ -55,29 +33,51 @@ export async function GET(request) {
 
     // Filtre par statut
     if (status !== 'all') {
-      query.status = status;
+      matchStage.status = status;
     }
 
-    const subscriptions = await db.collection("subscriptions")
-      .find(query)
-      .sort({ createdAt: -1 })
-      .toArray();
-
-    // Enrichir avec les informations utilisateur
-    const enrichedSubscriptions = await Promise.all(
-      subscriptions.map(async (sub) => {
-        try {
-          const user = await db.collection("users").findOne({ _id: sub.userId });
-          return {
-            ...sub,
-            userName: user ? `${user.name} ${user.surname}` : "Utilisateur inconnu",
-            userEmail: user?.email || ""
-          };
-        } catch (error) {
-          return sub;
+    // Utiliser une agrégation avec lookup pour optimiser les performances
+    // Au lieu de N requêtes (une par abonnement), on fait une seule requête
+    const enrichedSubscriptions = await db.collection("subscriptions").aggregate([
+      { $match: matchStage },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userInfo"
         }
-      })
-    );
+      },
+      {
+        $unwind: {
+          path: "$userInfo",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          userId: 1,
+          type: 1,
+          amount: 1,
+          startDate: 1,
+          endDate: 1,
+          status: 1,
+          createdAt: 1,
+          userName: {
+            $cond: {
+              if: "$userInfo",
+              then: { $concat: ["$userInfo.name", " ", "$userInfo.surname"] },
+              else: "Utilisateur inconnu"
+            }
+          },
+          userEmail: {
+            $ifNull: ["$userInfo.email", ""]
+          }
+        }
+      }
+    ]).toArray();
 
     return NextResponse.json({
       subscriptions: enrichedSubscriptions,
