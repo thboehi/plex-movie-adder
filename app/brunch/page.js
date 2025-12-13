@@ -368,6 +368,17 @@ export default function Brunch() {
                           }}
                           color="amber"
                         >
+                          <Option value="1" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <div className="flex items-center gap-2">
+                              <div className="h-6 w-6 rounded-full bg-green-200 dark:bg-green-700 flex items-center justify-center">
+                                <Typography className="font-bold text-xs text-green-700 dark:text-green-200">1</Typography>
+                              </div>
+                              <Typography className="font-normal">
+                                1 mois (Essai gratuit)
+                              </Typography>
+                            </div>
+                          </Option>
+                          
                           <Option value="3" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
                             <div className="flex items-center gap-2">
                               <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">

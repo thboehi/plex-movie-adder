@@ -10,13 +10,14 @@ export async function POST(request) {
 
     // Validation des formules
     const validSubscriptions = {
+      "1": { amount: 0, type: "trial" },
       "3": { amount: 29.90, type: "quarterly" },
       "12": { amount: 100, type: "annual" }
     };
 
     if (!validSubscriptions[months]) {
       return NextResponse.json({ 
-        error: "Formule invalide. Seulement 3 ou 12 mois autorisés." 
+        error: "Formule invalide. Seulement 1, 3 ou 12 mois autorisés." 
       }, { status: 400 });
     }
 
