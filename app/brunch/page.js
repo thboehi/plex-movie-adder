@@ -21,6 +21,7 @@ export default function Brunch() {
   const [selectedUser, setSelectedUser] = useState("");
   const [paymentData, setPaymentData] = useState({ amount: "", months: "3" });
   const [newUser, setNewUser] = useState({ name: "", surname: "", email: "" });
+  const [expandedUserId, setExpandedUserId] = useState(null);
   
 
   useEffect(() => {
@@ -186,7 +187,7 @@ export default function Brunch() {
         
         <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-4 lg:p-8">
         
-        <Hero adminAuthenticated={adminAuthenticated} subtitle="Abonnements" />
+        <Hero adminAuthenticated={adminAuthenticated} subtitle="Abonnements aux brunchs" />
         
         {/* Contenu principal */}
         {adminAuthenticated && (
@@ -448,7 +449,7 @@ export default function Brunch() {
                   <div className="mt-4 flex items-center gap-2 text-xs">
                     <span className="text-gray-600 dark:text-gray-300">Paiement&nbsp;:</span>
                     <span className="px-2 py-1 rounded-md bg-orange/10 text-orange font-medium">Revolut (préféré)</span>
-                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">TWINT</span>
+                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">TWINT (🤢)</span>
                   </div>
                 </div>
 
@@ -471,38 +472,102 @@ export default function Brunch() {
                   <div className="mt-4 flex items-center gap-2 text-xs">
                     <span className="text-gray-600 dark:text-gray-300">Paiement&nbsp;:</span>
                     <span className="px-2 py-1 rounded-md bg-orange/10 text-orange font-medium">Revolut (préféré)</span>
-                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">TWINT</span>
+                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">TWINT (🤢)</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div>
+            {/* Section paiement Revolut */}
+            <div className="w-full max-w-2xl mx-auto mb-10 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-black dark:to-black border border-blue-200 dark:border-gray-800 rounded-xl p-6 shadow-lg">
+              <div className="text-center mb-4">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">💳 Payer maintenant</h3>
+
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                  (TWINT nous donne des cauchemars si jamais)
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-6 items-center justify-center">
+                {/* QR Code */}
+                <div className="flex flex-col items-center">
+                  <div className="bg-white p-4 rounded-lg shadow-md">
+                    <img 
+                      src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://revolut.me/thomaboehi/pocket/cOdy73x5I2" 
+                      alt="QR Code Revolut" 
+                      className="w-48 h-48"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Scannez pour payer avec Revolut</p>
+                </div>
+
+                {/* Boutons CTA */}
+                <div className="flex flex-col gap-3 items-center">
+                  {/* Bouton 3 mois */}
+                  <a 
+                    href="https://revolut.me/thomaboehi/pocket/cOdy73x5I2?amount=2990&note=Brunch%203%20mois" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="group bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 w-full justify-center flex-col"
+                  >
+                    <img src="/rpay.svg" alt="Revolut Pay" className="w-12 h-5" />
+                    <span className="text-xs">3 mois - 29.90 CHF</span>
+                  </a>
+
+                  {/* Bouton 12 mois */}
+                  <a 
+                    href="https://revolut.me/thomaboehi/pocket/cOdy73x5I2?amount=10000&note=Brunch%2012%20mois" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="group bg-gradient-to-r from-orange to-orange/90 hover:from-orange/90 hover:to-orange text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 w-full justify-center relative flex-col"
+                  >
+                    <span className="absolute -top-2 -right-2 text-[9px] uppercase tracking-wide bg-white text-orange px-2 py-0.5 rounded-full shadow-sm font-bold">
+                      -16%
+                    </span>
+                    <img src="/rpay.svg" alt="Revolut Pay" className="w-12 h-5" />
+                    <span className="text-xs">12 mois - 100 CHF</span>
+                  </a>
+
+                  <div className="flex gap-2 items-center text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span>Instantané & sans frais</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                <p>✨ En utilisant Revolut, vous nous aidez à garder notre santé mentale intact</p>
+              </div>
+            </div>
+
+            <div className="w-full max-w-2xl mx-auto">
             {/* Afficher chaque utilisateur et sa date d'expiration de l'abonnement */}
             <h2 className="text-lg font-bold mb-4 text-center">Abonnements aux brunchs actifs</h2>
-            <div className="flex flex-col items-center gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {usersLoading ? (
               // Skeleton loader pour les cartes utilisateurs
               [...Array(4)].map((_, index) => (
                 <div 
                   key={index} 
-                  className="flex flex-col w-full items-center bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-4 rounded-md text-sm"
+                  className="aspect-square flex flex-col items-center justify-center bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-3 rounded-md text-sm"
                 >
                   <div className="relative w-full">
-                  <div className="h-7 w-32 mb-3 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden relative">
+                  <div className="h-6 w-20 mb-2 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                 </div>
-                <div className="h-4 w-24 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md mb-2 overflow-hidden relative">
+                <div className="h-3 w-16 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md mb-2 overflow-hidden relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                 </div>
-                <div className="h-4 w-20 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden relative">
+                <div className="h-3 w-14 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                 </div>
                   </div>
                 </div>
               ))
               ) : (
-                <AnimatePresence mode="popLayout">
+                <>
                   {getDisplayUsers().map((user, index) => {
                     // Calculer le temps restant
                     const now = new Date();
@@ -513,40 +578,134 @@ export default function Brunch() {
                     
                     // Vérifier si l'abonnement se termine dans 7 jours ou moins
                     const isAboutToExpire = daysRemaining <= 7;
+                    const isExpanded = expandedUserId === user._id;
                     
                     // Construire le message du temps restant
                     let timeRemainingMessage;
                     if (daysRemaining < 0) {
                         timeRemainingMessage = "Abonnement expiré";
                     } else if (isAboutToExpire) {
-                        timeRemainingMessage = `Abonnement se termine dans ${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''} et ${hoursRemaining} heure${hoursRemaining !== 1 ? 's' : ''}`;
+                        timeRemainingMessage = `Expire dans ${daysRemaining}j`;
                     } else {
-                        timeRemainingMessage = "Abonnement jusqu'au";
+                        timeRemainingMessage = "Jusqu'au";
                     }
                     
                     return (
-                      <motion.div 
+                      <div 
                         key={user._id}
-                        layout
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ 
-                          duration: 0.3,
-                          delay: index * 0.05,
-                          layout: { duration: 0.2 }
+                        style={{
+                          gridColumn: isExpanded ? "1 / -1" : "auto"
                         }}
-                        className={`flex flex-col w-full items-center bg-white border ${isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200'} dark:bg-gray-900 ${!isAboutToExpire ? 'dark:border-gray-800' : ''} p-4 rounded-md text-sm transition-all hover:scale-105`}
+                        onClick={() => setExpandedUserId(isExpanded ? null : user._id)}
+                        className={`${
+                          isExpanded 
+                            ? 'col-span-full p-6' 
+                            : 'aspect-square p-3'
+                        } flex flex-col ${
+                          isExpanded ? 'items-start' : 'items-center justify-center'
+                        } bg-white border ${
+                          isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200'
+                        } dark:bg-gray-900 ${
+                          !isAboutToExpire ? 'dark:border-gray-800' : ''
+                        } rounded-lg text-sm transition-all hover:shadow-lg cursor-pointer ${
+                          !isExpanded && 'hover:scale-105'
+                        }`}
                       >
-                        <p className="text-xl font-bold">{user.name} {user.surname}</p>
-                        <p className={`text-xs mt-3 ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>{timeRemainingMessage}</p>
-                        <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
-                          {isAboutToExpire ? '' : new Date(user.subscriptionEnd).toLocaleDateString()}
-                        </p>
-                      </motion.div>
+                        {!isExpanded ? (
+                          // Vue compacte
+                          <>
+                            <p className="text-base font-bold text-center leading-tight">{user.name} {user.surname}</p>
+                            <p className={`text-[10px] mt-2 text-center ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>{timeRemainingMessage}</p>
+                            <p className={`font-bold text-xs text-center ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
+                              {isAboutToExpire ? '' : new Date(user.subscriptionEnd).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                            </p>
+                          </>
+                        ) : (
+                          // Vue détaillée
+                          <div className="w-full space-y-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h3 className="text-2xl font-bold">{user.name} {user.surname}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                              </div>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setExpandedUserId(null);
+                                }}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Type d'abonnement</p>
+                                <p className="font-bold capitalize">{user.subscription?.currentType === 'annual' ? 'Annuel' : user.subscription?.currentType === 'quarterly' ? 'Trimestriel' : user.subscription?.currentType === 'trial' ? 'Essai' : 'N/A'}</p>
+                              </div>
+                              
+                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expire le</p>
+                                <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
+                                  {new Date(user.subscriptionEnd).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                </p>
+                              </div>
+                              
+                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Dernier paiement</p>
+                                <p className="font-bold">
+                                  {user.subscription?.lastPaymentAmount ? `${user.subscription.lastPaymentAmount} CHF` : 'N/A'}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                  {user.subscription?.lastPaymentDate ? new Date(user.subscription.lastPaymentDate).toLocaleDateString('fr-FR') : ''}
+                                </p>
+                              </div>
+                              
+                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Temps restant</p>
+                                <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
+                                  {daysRemaining >= 0 ? `${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''}` : 'Expiré'}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {user.subscription?.history && user.subscription.history.length > 0 && (
+                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Historique des paiements</p>
+                                <div className="space-y-2 max-h-40 overflow-y-auto">
+                                  {(adminAuthenticated ? user.subscription.history : user.subscription.history.slice(-1)).map((entry, idx) => (
+                                    <div key={idx} className="flex justify-between items-center text-sm border-b border-gray-200 dark:border-gray-700 pb-2 last:border-0">
+                                      <div>
+                                        <p className="font-medium">{entry.amount} CHF - {entry.months} mois</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                          {new Date(entry.date).toLocaleDateString('fr-FR')}
+                                        </p>
+                                      </div>
+                                      <span className={`text-xs px-2 py-1 rounded-full ${
+                                        entry.type === 'annual' ? 'bg-orange/10 text-orange' : 
+                                        entry.type === 'quarterly' ? 'bg-gray-200 dark:bg-gray-700' :
+                                        'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+                                      }`}>
+                                        {entry.type === 'annual' ? 'Annuel' : entry.type === 'quarterly' ? 'Trimestriel' : 'Essai'}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">
+                              Membre depuis {new Date(user.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
-                </AnimatePresence>
+                </>
               )}
             </div>
             </div>

@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
+import SnowfallEffect from './components/Snowfall';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +25,7 @@ export default function RootLayout({ children }) {
       >
         {children}
         <script src="https://thbo.ch/credits.js" async />
+        <SnowfallEffect />
       </body>
     </html>
   );
