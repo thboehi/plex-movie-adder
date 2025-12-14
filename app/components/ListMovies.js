@@ -223,7 +223,7 @@ export default function ListMovies( { adminAuthenticated, onMovieDeleted } ) {
         placeholder="Rechercher un film..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="block w-full max-w-xl p-3 text-lg border border-gray-300 rounded-md mb-8 outline-none focus:border-orange focus:ring-2 focus:ring-orange hover:border-orange dark:bg-gray-900 dark:border-gray-800 transition-colors"
+        className="block w-full max-w-xl p-3 text-lg border border-gray-800 rounded-md mb-8 outline-none focus:border-orange focus:ring-2 focus:ring-orange hover:border-orange bg-gray-900/50 z-10 backdrop-blur-sm text-white transition-colors"
       />
 
       {/* Section des résultats de recherche */}
@@ -258,7 +258,7 @@ export default function ListMovies( { adminAuthenticated, onMovieDeleted } ) {
                         ease: "easeOut"
                       }}
                       onClick={() => handleAddMovie(movie)}
-                      className="cursor-pointer border border-gray-300 rounded-lg overflow-hidden w-32 text-center shadow transition-all duration-200 hover:scale-105 hover:border-orange hover:shadow-lg"
+                      className="cursor-pointer border border-gray-800 rounded-lg overflow-hidden w-32 text-center shadow transition-all duration-200 hover:scale-105 hover:border-orange hover:shadow-lg bg-gray-900/50 z-10 backdrop-blur-sm"
                     >
                       {movie.Poster && movie.Poster !== "N/A" ? (
                         <div className="relative w-full h-44">
@@ -272,13 +272,13 @@ export default function ListMovies( { adminAuthenticated, onMovieDeleted } ) {
                           />
                         </div>
                       ) : (
-                        <div className="w-full h-44 bg-gray-200 flex items-center justify-center">
+                        <div className="w-full h-44 bg-gray-800 flex items-center justify-center text-gray-400">
                           Pas d&apos;image
                         </div>
                       )}
                       <div className="p-2">
-                        <h3 className="text-sm font-semibold">{movie.Title}</h3>
-                        <p className="text-xs text-gray-500">{movie.Year}</p>
+                        <h3 className="text-sm font-semibold text-white">{movie.Title}</h3>
+                        <p className="text-xs text-gray-400">{movie.Year}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -299,26 +299,26 @@ export default function ListMovies( { adminAuthenticated, onMovieDeleted } ) {
             {[...Array(6)].map((_, index) => (
               <div
                 key={index}
-                className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow"
+                className="relative border border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow"
               >
                 {/* Image skeleton */}
-                <div className="relative w-full h-56 bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                <div className="relative w-full h-56 bg-gray-700 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                 </div>
                 {/* Text skeleton */}
                 <div className="p-2 space-y-2">
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded mx-auto w-24 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                  <div className="h-4 bg-gray-700 rounded mx-auto w-24 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                   </div>
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded mx-auto w-12 overflow-hidden relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                  <div className="h-3 bg-gray-700 rounded mx-auto w-12 overflow-hidden relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : listMovies.length === 0 ? (
-          <p className="text-center text-gray-500">Aucun film dans la liste d&apos;attente</p>
+          <p className="text-center text-gray-400">Aucun film dans la liste d&apos;attente</p>
         ) : (
           <motion.div 
             className="flex flex-wrap gap-3 justify-center"
@@ -343,7 +343,7 @@ export default function ListMovies( { adminAuthenticated, onMovieDeleted } ) {
                     delay: index * 0.03,
                     layout: { duration: 0.3 }
                   }}
-                  className="relative border border-gray-300 dark:border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow transition-all hover:scale-105 hover:shadow-xl"
+                  className="relative border border-gray-800 rounded-lg overflow-hidden w-40 text-center shadow transition-all hover:scale-105 hover:shadow-xl bg-gray-900/50 z-10 backdrop-blur-sm"
                 >
                   {movie.Poster && movie.Poster !== "N/A" ? (
                     <div className="relative w-full h-56">
@@ -359,13 +359,13 @@ export default function ListMovies( { adminAuthenticated, onMovieDeleted } ) {
                       />
                     </div>
                   ) : (
-                    <div className="w-full h-56 bg-gray-200 flex items-center justify-center">
+                    <div className="w-full h-56 bg-gray-800 flex items-center justify-center text-gray-400">
                       Pas d&apos;image
                     </div>
                   )}
                   <div className="p-2">
-                    <h3 className="text-base font-semibold">{movie.Title}</h3>
-                    <p className="text-sm text-gray-500">{movie.Year}</p>
+                    <h3 className="text-base font-semibold text-white">{movie.Title}</h3>
+                    <p className="text-sm text-gray-400">{movie.Year}</p>
                   </div>
                 {/* Indicateur "Ajouté" en haut à droite */}
                 {adminAuthenticated && (

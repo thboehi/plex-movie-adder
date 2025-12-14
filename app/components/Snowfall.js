@@ -14,7 +14,7 @@ export default function SnowfallEffect() {
         position: 'fixed',
         width: '100vw',
         height: '100vh',
-        zIndex: 999,
+        zIndex: 0,
         pointerEvents: 'none'
       }}
     />

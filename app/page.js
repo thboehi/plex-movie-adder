@@ -53,7 +53,7 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black p-8">
         <div className="flex justify-center items-center">
           {/* Demi rond stylisé qui tourne */}
           <div className="w-12 h-12 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
@@ -69,7 +69,7 @@ export default function Home() {
   return (
     <>
       <Navbar current="films" authenticated={authenticated} adminAuthenticated={adminAuthenticated} />
-      <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-4 lg:p-8">
+      <main className="min-h-screen flex flex-col items-center justify-center bg-black p-4 lg:p-8">
         <Hero adminAuthenticated={adminAuthenticated} subtitle="Movie Adder" />
         
         {/* Contenu principal */}
@@ -79,7 +79,7 @@ export default function Home() {
         />
         <AddedMovies refreshTrigger={refreshAddedMovies} />
         <div className="m-20 p-10 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
-          <p className="text-gray-400 dark:text-gray-700">Site web créé et maintenu par{" "}
+          <p className="text-gray-700">Site web créé et maintenu par{" "}
             <a className="group text-orange font-bold transition-all hover:underline" href="https://thbo.ch" target="_blank">
               <DecryptedText
                 text="thbo.ch"

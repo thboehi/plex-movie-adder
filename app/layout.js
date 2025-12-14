@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 dark:bg-black`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}
       >
         {children}
         <script src="https://thbo.ch/credits.js" async />

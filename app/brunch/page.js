@@ -168,7 +168,7 @@ export default function Brunch() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-8">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black p-8">
         <div className="flex justify-center items-center">
           {/* Demi rond stylisé qui tourne */}
           <div className="w-12 h-12 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
@@ -185,19 +185,19 @@ export default function Brunch() {
     <>
         <Navbar current={"abonnements"} authenticated={authenticated} adminAuthenticated={adminAuthenticated} />
         
-        <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 dark:bg-black p-4 lg:p-8">
+        <main className="min-h-screen flex flex-col items-center justify-center bg-black p-4 lg:p-8">
         
         <Hero adminAuthenticated={adminAuthenticated} subtitle="Abonnements aux brunchs" />
         
         {/* Contenu principal */}
         {adminAuthenticated && (
           <div>
-            <button onClick={openModal} className="block border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-900 rounded-lg bg-white dark:text-white dark:bg-gray-900 dark:hover:text-white hover:border-orange transition-colors w-full self-end place-self-end cursor-pointer mb-12">Ajouter un paiement</button>
+            <button onClick={openModal} className="block border border-gray-800 py-2 px-3 text-white rounded-lg bg-gray-900/50 z-10 hover:text-white hover:border-orange transition-colors w-full self-end place-self-end cursor-pointer mb-12">Ajouter un paiement</button>
             
             {isModalOpen && (
               <div className="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm transition-all duration-300">
                 <div 
-                  className="bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-800 p-6 w-96 max-w-[90%] transform transition-all duration-300 ease-in-out"
+                  className="bg-gray-900 rounded-lg shadow-xl border border-gray-800 p-6 w-96 max-w-[90%] transform transition-all duration-300 ease-in-out"
                   style={{
                     animation: "modalFadeIn 0.3s ease-out forwards"
                   }}
@@ -231,9 +231,9 @@ export default function Brunch() {
                           color="amber"
                         >
                           {users.map(user => (
-                            <Option key={user._id} value={user._id} className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                            <Option key={user._id} value={user._id} className="text-white hover:bg-gray-800">
                               <div className="flex items-center gap-2">
-                                <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                                <div className="h-6 w-6 rounded-full bg-gray-700 flex items-center justify-center">
                                   <Typography className="font-bold text-xs">
                                     {user.name.charAt(0)}{user.surname.charAt(0)}
                                   </Typography>
@@ -244,7 +244,7 @@ export default function Brunch() {
                               </div>
                             </Option>
                           ))}
-                          <Option value="new" className="text-orange font-medium border-t border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
+                          <Option value="new" className="text-orange font-medium border-t border-gray-700 hover:bg-gray-800">
                             <div className="flex items-center gap-2">
                               <div className="h-6 w-6 rounded-full bg-orange bg-opacity-20 flex items-center justify-center">
                                 <svg className="w-3 h-3 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -261,8 +261,8 @@ export default function Brunch() {
                       
                       {selectedUser && (
                         <div className="mt-4 animate-fadeIn">
-                          <div className="p-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
-                            <Typography className="text-gray-700 dark:text-gray-300 text-sm">
+                          <div className="p-3 border border-gray-800 rounded-lg bg-gray-900 flex justify-between items-center">
+                            <Typography className="text-gray-300 text-sm">
                               {selectedUser === "new" 
                                 ? "Créer un nouvel utilisateur" 
                                 : `Utilisateur sélectionné: ${users.find(u => u._id === selectedUser)?.name || ""} ${users.find(u => u._id === selectedUser)?.surname || ""}`
@@ -288,7 +288,7 @@ export default function Brunch() {
 
                   {modalStep === 2 && (
                     <div className="space-y-4 transform transition-all duration-300 ease-in-out" style={{ animation: "slideIn 0.3s ease-out forwards" }}>
-                      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
+                      <h2 className="text-xl font-bold mb-4 text-white flex items-center">
                         <svg className="w-5 h-5 mr-2 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                         </svg>
@@ -299,7 +299,7 @@ export default function Brunch() {
                         <input 
                           type="text" 
                           placeholder="Prénom" 
-                          className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
+                          className="w-full border border-gray-700 rounded-lg p-3 bg-gray-800 text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
                           value={newUser.name} 
                           onChange={(e) => setNewUser({...newUser, name: e.target.value})} 
                         />
@@ -307,7 +307,7 @@ export default function Brunch() {
                         <input 
                           type="text" 
                           placeholder="Nom" 
-                          className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
+                          className="w-full border border-gray-700 rounded-lg p-3 bg-gray-800 text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
                           value={newUser.surname} 
                           onChange={(e) => setNewUser({...newUser, surname: e.target.value})} 
                         />
@@ -315,7 +315,7 @@ export default function Brunch() {
                         <input 
                           type="email" 
                           placeholder="Email" 
-                          className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
+                          className="w-full border border-gray-700 rounded-lg p-3 bg-gray-800 text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
                           value={newUser.email} 
                           onChange={(e) => setNewUser({...newUser, email: e.target.value})} 
                         />
@@ -335,7 +335,7 @@ export default function Brunch() {
 
                   {modalStep === 3 && (
                     <div className="space-y-4 transform transition-all duration-300 ease-in-out" style={{ animation: "slideIn 0.3s ease-out forwards" }}>
-                      <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white flex items-center">
+                      <h2 className="text-xl font-bold mb-4 text-white flex items-center">
                         <svg className="w-5 h-5 mr-2 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -347,11 +347,11 @@ export default function Brunch() {
                           <input 
                             type="number" 
                             placeholder="0" 
-                            className="w-full border border-gray-300 dark:border-gray-700 rounded-lg p-3 pl-12 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
+                            className="w-full border border-gray-700 rounded-lg p-3 pl-12 bg-gray-800 text-white focus:border-orange focus:ring-2 focus:ring-orange focus:ring-opacity-50 outline-none transition-colors" 
                             value={paymentData.amount} 
                             onChange={(e) => setPaymentData({...paymentData, amount: e.target.value})} 
                           />
-                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                             CHF
                           </span>
                         </div>
@@ -369,10 +369,10 @@ export default function Brunch() {
                           }}
                           color="amber"
                         >
-                          <Option value="1" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                          <Option value="1" className="text-white hover:bg-gray-800">
                             <div className="flex items-center gap-2">
-                              <div className="h-6 w-6 rounded-full bg-green-200 dark:bg-green-700 flex items-center justify-center">
-                                <Typography className="font-bold text-xs text-green-700 dark:text-green-200">1</Typography>
+                              <div className="h-6 w-6 rounded-full bg-green-700 flex items-center justify-center">
+                                <Typography className="font-bold text-xs text-green-200">1</Typography>
                               </div>
                               <Typography className="font-normal">
                                 1 mois (Essai gratuit)
@@ -380,9 +380,9 @@ export default function Brunch() {
                             </div>
                           </Option>
                           
-                          <Option value="3" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                          <Option value="3" className="text-white hover:bg-gray-800">
                             <div className="flex items-center gap-2">
-                              <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                              <div className="h-6 w-6 rounded-full bg-gray-700 flex items-center justify-center">
                                 <Typography className="font-bold text-xs">3</Typography>
                               </div>
                               <Typography className="font-normal">
@@ -391,7 +391,7 @@ export default function Brunch() {
                             </div>
                           </Option>
                           
-                          <Option value="12" className="text-gray-800 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+                          <Option value="12" className="text-white hover:bg-gray-800">
                             <div className="flex items-center gap-2">
                               <div className="h-6 w-6 rounded-full bg-orange bg-opacity-20 flex items-center justify-center">
                                 <Typography className="font-bold text-xs text-orange">12</Typography>
@@ -418,7 +418,7 @@ export default function Brunch() {
                   
                   <button 
                     onClick={closeModal} 
-                    className="mt-6 w-full border border-gray-200 dark:border-gray-800 py-2 px-3 text-gray-700 dark:text-gray-300 rounded-lg hover:border-orange dark:hover:border-orange transition-colors flex items-center justify-center"
+                    className="mt-6 w-full border border-gray-800 py-2 px-3 text-gray-300 rounded-lg hover:border-orange transition-colors flex items-center justify-center"
                   >
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -435,55 +435,55 @@ export default function Brunch() {
               <h2 className="sr-only">Tarifs</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Trimestriel */}
-                <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5">
+                <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-5 z-10 backdrop-blur-sm">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">Trimestriel</span>
+                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-800 text-gray-300">Trimestriel</span>
                   </div>
                   <div className="flex items-end gap-1">
-                    <span className="text-3xl font-bold text-gray-900 dark:text-white">29.90&nbsp;CHF</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">/3 mois</span>
+                    <span className="text-3xl font-bold text-white">29.90&nbsp;CHF</span>
+                    <span className="text-xs text-gray-400 mb-1">/3 mois</span>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <div className="text-xs text-gray-400 mt-1">
                     Soit 9.97&nbsp;CHF/mois
                   </div>
                   <div className="mt-4 flex items-center gap-2 text-xs">
-                    <span className="text-gray-600 dark:text-gray-300">Paiement&nbsp;:</span>
+                    <span className="text-gray-300">Paiement&nbsp;:</span>
                     <span className="px-2 py-1 rounded-md bg-orange/10 text-orange font-medium">Revolut (préféré)</span>
-                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">TWINT (🤢)</span>
+                    <span className="px-2 py-1 rounded-md bg-gray-800 text-gray-300">TWINT (🤢)</span>
                   </div>
                 </div>
 
                 {/* Annuel (mis en avant) */}
-                <div className="relative rounded-xl border border-orange/60 bg-white dark:bg-gray-900 p-5 ring-1 ring-orange/20">
+                <div className="relative rounded-xl border border-orange/60 bg-gray-900/50 p-5 ring-1 ring-orange/20 z-10 backdrop-blur-sm">
                   <span className="absolute -top-3 right-3 text-[10px] uppercase tracking-wide bg-orange text-white px-2 py-1 rounded-md shadow">Le plus avantageux</span>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium px-2 py-1 rounded-full bg-orange/10 text-orange">Annuel</span>
                   </div>
                   <div className="flex items-end gap-1">
                     <span className="text-3xl font-bold text-orange">100&nbsp;CHF</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400 mb-1">/an</span>
+                    <span className="text-xs text-gray-400 mb-1">/an</span>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 line-through mt-1">
+                  <div className="text-xs text-gray-400 line-through mt-1">
                     {(29.90 * 4).toFixed(2)}&nbsp;CHF
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <div className="text-xs text-gray-400 mt-1">
                     Soit 8.33&nbsp;CHF/mois
                   </div>
                   <div className="mt-4 flex items-center gap-2 text-xs">
-                    <span className="text-gray-600 dark:text-gray-300">Paiement&nbsp;:</span>
+                    <span className="text-gray-300">Paiement&nbsp;:</span>
                     <span className="px-2 py-1 rounded-md bg-orange/10 text-orange font-medium">Revolut (préféré)</span>
-                    <span className="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">TWINT (🤢)</span>
+                    <span className="px-2 py-1 rounded-md bg-gray-800 text-gray-300">TWINT (🤢)</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Section paiement Revolut */}
-            <div className="w-full max-w-2xl mx-auto mb-10 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-black dark:to-black border border-blue-200 dark:border-gray-800 rounded-xl p-6 shadow-lg">
+            <div className="w-full max-w-2xl mx-auto mb-10 bg-gray-900/50 border border-gray-800 rounded-xl p-6 shadow-lg z-10 backdrop-blur-sm">
               <div className="text-center mb-4">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">💳 Payer maintenant</h3>
+                <h3 className="text-2xl font-bold text-white mb-2">💳 Payer maintenant</h3>
 
-                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                <p className="text-xs text-gray-400 italic">
                   (TWINT nous donne des cauchemars si jamais)
                 </p>
               </div>
@@ -498,7 +498,7 @@ export default function Brunch() {
                       className="w-48 h-48"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Scannez pour payer avec Revolut</p>
+                  <p className="text-xs text-gray-400 mt-2">Scannez pour payer avec Revolut</p>
                 </div>
 
                 {/* Boutons CTA */}
@@ -528,7 +528,7 @@ export default function Brunch() {
                     <span className="text-xs">12 mois - 100 CHF</span>
                   </a>
 
-                  <div className="flex gap-2 items-center text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  <div className="flex gap-2 items-center text-xs text-gray-400 mt-1">
                     <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
@@ -537,31 +537,31 @@ export default function Brunch() {
                 </div>
               </div>
 
-              <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+              <div className="mt-4 text-center text-xs text-gray-400">
                 <p>✨ En utilisant Revolut, vous nous aidez à garder notre santé mentale intact</p>
               </div>
             </div>
 
             <div className="w-full max-w-2xl mx-auto">
             {/* Afficher chaque utilisateur et sa date d'expiration de l'abonnement */}
-            <h2 className="text-lg font-bold mb-4 text-center">Abonnements aux brunchs actifs</h2>
+            <h2 className="text-lg text-white font-bold mb-4 text-center">Abonnements aux brunchs actifs</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {usersLoading ? (
               // Skeleton loader pour les cartes utilisateurs
               [...Array(4)].map((_, index) => (
                 <div 
                   key={index} 
-                  className="aspect-square flex flex-col items-center justify-center bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 p-3 rounded-md text-sm"
+                  className="aspect-square flex flex-col items-center justify-center bg-gray-950 border border-gray-800 p-3 rounded-md text-sm"
                 >
                   <div className="relative w-full">
-                  <div className="h-6 w-20 mb-2 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                  <div className="h-6 w-20 mb-2 mx-auto bg-gray-700 rounded-md overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                 </div>
-                <div className="h-3 w-16 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md mb-2 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                <div className="h-3 w-16 mx-auto bg-gray-700 rounded-md mb-2 overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                 </div>
-                <div className="h-3 w-14 mx-auto bg-gray-200 dark:bg-gray-700 rounded-md overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
+                <div className="h-3 w-14 mx-auto bg-gray-700 rounded-md overflow-hidden relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
                 </div>
                   </div>
                 </div>
@@ -603,20 +603,18 @@ export default function Brunch() {
                             : 'aspect-square p-3'
                         } flex flex-col ${
                           isExpanded ? 'items-start' : 'items-center justify-center'
-                        } bg-white border ${
-                          isAboutToExpire ? 'border-red-500 dark:border-red-600' : 'border-gray-200'
-                        } dark:bg-gray-900 ${
-                          !isAboutToExpire ? 'dark:border-gray-800' : ''
+                        } bg-gray-900/50 backdrop-blur-sm border ${
+                          isAboutToExpire ? 'border-red-600' : 'border-gray-800'
                         } rounded-lg text-sm transition-all hover:shadow-lg cursor-pointer ${
                           !isExpanded && 'hover:scale-105'
-                        }`}
+                        } z-10`}
                       >
                         {!isExpanded ? (
                           // Vue compacte
                           <>
-                            <p className="text-base font-bold text-center leading-tight">{user.name} {user.surname}</p>
-                            <p className={`text-[10px] mt-2 text-center ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : 'text-gray-500'}`}>{timeRemainingMessage}</p>
-                            <p className={`font-bold text-xs text-center ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
+                            <p className="text-base font-bold text-center leading-tight text-white">{user.name} {user.surname}</p>
+                            <p className={`text-[10px] mt-2 text-center ${isAboutToExpire ? 'text-red-400' : 'text-gray-400'}`}>{timeRemainingMessage}</p>
+                            <p className={`font-bold text-xs text-center ${isAboutToExpire ? 'text-red-400' : 'text-white'}`}>
                               {isAboutToExpire ? '' : new Date(user.subscriptionEnd).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                             </p>
                           </>
@@ -625,69 +623,69 @@ export default function Brunch() {
                           <div className="w-full space-y-4">
                             <div className="flex justify-between items-start">
                               <div>
-                                <h3 className="text-2xl font-bold">{user.name} {user.surname}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                                <h3 className="text-2xl font-bold text-white">{user.name} {user.surname}</h3>
+                                <p className="text-sm text-gray-400">{user.email}</p>
                               </div>
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setExpandedUserId(null);
                                 }}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
                               >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                               </button>
                             </div>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Type d'abonnement</p>
-                                <p className="font-bold capitalize">{user.subscription?.currentType === 'annual' ? 'Annuel' : user.subscription?.currentType === 'quarterly' ? 'Trimestriel' : user.subscription?.currentType === 'trial' ? 'Essai' : 'N/A'}</p>
+                              <div className="bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-400 mb-1">Type d'abonnement</p>
+                                <p className="font-bold capitalize text-white">{user.subscription?.currentType === 'annual' ? 'Annuel' : user.subscription?.currentType === 'quarterly' ? 'Trimestriel' : user.subscription?.currentType === 'trial' ? 'Essai' : 'N/A'}</p>
                               </div>
                               
-                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expire le</p>
-                                <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
+                              <div className="bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-400 mb-1">Expire le</p>
+                                <p className={`font-bold ${isAboutToExpire ? 'text-red-400' : 'text-white'}`}>
                                   {new Date(user.subscriptionEnd).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                                 </p>
                               </div>
                               
-                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Dernier paiement</p>
-                                <p className="font-bold">
+                              <div className="bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-400 mb-1">Dernier paiement</p>
+                                <p className="font-bold text-white">
                                   {user.subscription?.lastPaymentAmount ? `${user.subscription.lastPaymentAmount} CHF` : 'N/A'}
                                 </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                <p className="text-xs text-gray-400 mt-1">
                                   {user.subscription?.lastPaymentDate ? new Date(user.subscription.lastPaymentDate).toLocaleDateString('fr-FR') : ''}
                                 </p>
                               </div>
                               
-                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Temps restant</p>
-                                <p className={`font-bold ${isAboutToExpire ? 'text-red-600 dark:text-red-400' : ''}`}>
+                              <div className="bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-400 mb-1">Temps restant</p>
+                                <p className={`font-bold ${isAboutToExpire ? 'text-red-400' : 'text-white'}`}>
                                   {daysRemaining >= 0 ? `${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''}` : 'Expiré'}
                                 </p>
                               </div>
                             </div>
                             
                             {user.subscription?.history && user.subscription.history.length > 0 && (
-                              <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Historique des paiements</p>
+                              <div className="bg-gray-800 p-4 rounded-lg">
+                                <p className="text-xs text-gray-400 mb-2">Historique des paiements</p>
                                 <div className="space-y-2 max-h-40 overflow-y-auto">
                                   {(adminAuthenticated ? user.subscription.history : user.subscription.history.slice(-1)).map((entry, idx) => (
-                                    <div key={idx} className="flex justify-between items-center text-sm border-b border-gray-200 dark:border-gray-700 pb-2 last:border-0">
+                                    <div key={idx} className="flex justify-between items-center text-sm border-b border-gray-700 pb-2 last:border-0">
                                       <div>
-                                        <p className="font-medium">{entry.amount} CHF - {entry.months} mois</p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        <p className="font-medium text-white">{entry.amount} CHF - {entry.months} mois</p>
+                                        <p className="text-xs text-gray-400">
                                           {new Date(entry.date).toLocaleDateString('fr-FR')}
                                         </p>
                                       </div>
                                       <span className={`text-xs px-2 py-1 rounded-full ${
                                         entry.type === 'annual' ? 'bg-orange/10 text-orange' : 
-                                        entry.type === 'quarterly' ? 'bg-gray-200 dark:bg-gray-700' :
-                                        'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+                                        entry.type === 'quarterly' ? 'bg-gray-700 text-gray-300' :
+                                        'bg-green-900 text-green-300'
                                       }`}>
                                         {entry.type === 'annual' ? 'Annuel' : entry.type === 'quarterly' ? 'Trimestriel' : 'Essai'}
                                       </span>
@@ -697,7 +695,7 @@ export default function Brunch() {
                               </div>
                             )}
                             
-                            <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">
+                            <p className="text-xs text-gray-500 text-center mt-2">
                               Membre depuis {new Date(user.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                             </p>
                           </div>
@@ -711,7 +709,7 @@ export default function Brunch() {
             </div>
         
             <div className="m-20 p-10 w-full flex justify-center opacity-10 hover:opacity-80 transition-opacity">
-            <p className="text-gray-400 dark:text-gray-700">Site web créé et maintenu par{" "}
+            <p className="text-gray-700">Site web créé et maintenu par{" "}
                 <a className="group text-orange font-bold transition-all hover:underline" href="https://thbo.ch" target="_blank">
                 <DecryptedText
                     text="thbo.ch"
