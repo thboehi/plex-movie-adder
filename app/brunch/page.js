@@ -145,15 +145,19 @@ export default function Brunch() {
   }
 
   // Liste d'utilisateurs à afficher selon le rôle:
-  // - Admin: aucun filtre, ordre inchangé (par date d'expiration tel que fourni).
-  // - Non-admin: filtrer les expirés depuis > 1 mois, trier par prénom (name).
+  // - Admin: aucun filtre, tri par date d'expiration (du plus proche au plus éloigné).
+  // - Non-admin: filtrer les expirés depuis > 1 mois, tri par date d'expiration (du plus proche au plus éloigné).
   function getDisplayUsers() {
     if (usersLoading) return [];
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
     if (adminAuthenticated) {
-      return users;
+      return [...users].sort((a, b) => {
+        const dateA = a.subscriptionEnd ? new Date(a.subscriptionEnd) : new Date(0);
+        const dateB = b.subscriptionEnd ? new Date(b.subscriptionEnd) : new Date(0);
+        return dateA - dateB; // Tri croissant (date la plus proche en premier)
+      });
     }
 
     return [...users]
@@ -163,7 +167,11 @@ export default function Brunch() {
         if (isNaN(end)) return true; // on garde si date invalide
         return end >= oneMonthAgo; // on cache si expiré depuis > 1 mois
       })
-      .sort((a, b) => (a.name || "").localeCompare(b.name || "", "fr", { sensitivity: "base" }));
+      .sort((a, b) => {
+        const dateA = a.subscriptionEnd ? new Date(a.subscriptionEnd) : new Date(0);
+        const dateB = b.subscriptionEnd ? new Date(b.subscriptionEnd) : new Date(0);
+        return dateA - dateB; // Tri croissant (date la plus proche en premier)
+      });
   }
 
   if (loading) {
