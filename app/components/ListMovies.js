@@ -521,11 +521,11 @@ export default function ListMovies( { adminAuthenticated, onMovieDeleted } ) {
                   >
                     {/* Titre de la note */}
                     <div className="p-4 bg-gradient-to-b from-purple-900/20 to-transparent border-b border-purple-500/30">
-                      <h3 className="text-lg font-bold text-purple-300 text-center">Note des admins</h3>
+                      <h3 className="text-lg font-extrabold text-purple-300 text-center">Note des admins</h3>
                     </div>
                     
                     {/* Contenu de la note */}
-                    <div className="w-full h-[14rem] bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="w-full h-[14rem] bg-purple-900/20 flex items-center justify-center p-4 overflow-y-auto">
                       <p className="text-white text-sm whitespace-pre-wrap leading-relaxed">
                         {movie.admin_note}
                       </p>
