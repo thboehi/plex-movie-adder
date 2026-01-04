@@ -86,6 +86,10 @@ export async function POST(request) {
 
     // Notification à n8n
     try {
+      // Import dynamique de node-fetch et https pour le bypass SSL
+      const fetch = (await import('node-fetch')).default;
+      const https = await import('https');
+      
       // Préparer les données pour le webhook
       const webhookData = {
         title: movie.Title,
@@ -95,27 +99,21 @@ export async function POST(request) {
         added_date: added_date
       };
 
-      // Configuration du fetch avec gestion SSL optionnelle
-      const fetchOptions = {
+      // Agent HTTPS avec rejectUnauthorized désactivé
+      const httpsAgent = new https.Agent({
+        rejectUnauthorized: false
+      });
+
+      // Appel au webhook n8n avec node-fetch
+      const webhookResponse = await fetch(process.env.N8N_WEBHOOK_LINK, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           [process.env.N8N_WEBHOOK_HEADER]: process.env.N8N_WEBHOOK_PASSWORD
         },
-        body: JSON.stringify(webhookData)
-      };
-
-      // Désactiver la vérification SSL pour n8n (certificat Let's Encrypt E7 pas reconnu par Vercel)
-      // Peut être activé/désactivé via N8N_DISABLE_SSL_VERIFY=false si besoin
-      if (process.env.N8N_DISABLE_SSL_VERIFY !== "false") {
-        const https = await import("https");
-        fetchOptions.agent = new https.Agent({
-          rejectUnauthorized: false
-        });
-      }
-
-      // Appel au webhook n8n
-      const webhookResponse = await fetch(process.env.N8N_WEBHOOK_LINK, fetchOptions);
+        body: JSON.stringify(webhookData),
+        agent: httpsAgent
+      });
 
       if (!webhookResponse.ok) {
         console.warn("Webhook notification failed:", await webhookResponse.text());
