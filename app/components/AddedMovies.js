@@ -58,7 +58,7 @@ export default function AddedMovies({ refreshTrigger }) {
           {addedMovies.slice(0, visibleCount).map((movie) => (
             <div
               key={movie.imdbID}
-              className="group border border-gray-800 rounded-lg overflow-hidden w-24 text-center shadow hover:shadow-lg hover:scale-105 transition-all bg-gray-900/50 z-10 backdrop-blur-sm"
+              className="group border border-gray-800 rounded-lg overflow-hidden w-24 text-center shadow hover:shadow-lg transition-all duration-300 ease-in-out bg-gray-900/50 z-10 backdrop-blur-sm"
             >
               {movie.Poster && movie.Poster !== "N/A" ? (
                 <img

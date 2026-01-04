@@ -136,6 +136,54 @@ export async function POST(request) {
   }
 }
 
+// PATCH : Met à jour la note d'un film (admin uniquement)
+export async function PATCH(request) {
+  try {
+    const { imdbID, admin_note } = await request.json();
+    
+    // Validation
+    if (!imdbID) {
+      return NextResponse.json(
+        { error: "Missing imdbID" },
+        { status: 400 }
+      );
+    }
+    
+    if (typeof imdbID !== 'string' || !/^tt\d+$/.test(imdbID)) {
+      return NextResponse.json(
+        { error: "Invalid imdbID format" },
+        { status: 400 }
+      );
+    }
+    
+    const { db } = await connectToDatabase();
+    
+    // Mettre à jour la note
+    const result = await db.collection("movies").updateOne(
+      { imdbID },
+      { $set: { admin_note: admin_note || null, note_updated_at: new Date() } }
+    );
+    
+    if (result.matchedCount === 0) {
+      return NextResponse.json(
+        { error: "Movie not found" },
+        { status: 404 }
+      );
+    }
+    
+    // Récupérer le film mis à jour
+    const updatedMovie = await db.collection("movies").findOne({ imdbID });
+    
+    return NextResponse.json(updatedMovie);
+  } catch (error) {
+    console.error("Error in PATCH:", error);
+    return NextResponse.json(
+      { error: "Failed to update movie note" },
+      { status: 500 }
+    );
+  }
+}
+
 // DELETE : Au lieu de supprimer définitivement, on met le film en "trash"
 // en mettant à jour le champ "deleted" et en enregistrant l'IP dans "deleted_by"
 export async function DELETE(request) {
