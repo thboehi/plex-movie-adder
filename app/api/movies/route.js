@@ -105,9 +105,11 @@ export async function POST(request) {
         body: JSON.stringify(webhookData)
       };
 
-      // Si défini dans l'env, désactiver la vérification SSL (utile pour certificats auto-signés)
-      if (process.env.N8N_DISABLE_SSL_VERIFY === "true") {
-        fetchOptions.agent = new (await import("https")).Agent({
+      // Désactiver la vérification SSL pour n8n (certificat Let's Encrypt E7 pas reconnu par Vercel)
+      // Peut être activé/désactivé via N8N_DISABLE_SSL_VERIFY=false si besoin
+      if (process.env.N8N_DISABLE_SSL_VERIFY !== "false") {
+        const https = await import("https");
+        fetchOptions.agent = new https.Agent({
           rejectUnauthorized: false
         });
       }
