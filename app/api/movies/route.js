@@ -95,15 +95,25 @@ export async function POST(request) {
         added_date: added_date
       };
 
-      // Appel au webhook n8n
-      const webhookResponse = await fetch(process.env.N8N_WEBHOOK_LINK, {
+      // Configuration du fetch avec gestion SSL optionnelle
+      const fetchOptions = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           [process.env.N8N_WEBHOOK_HEADER]: process.env.N8N_WEBHOOK_PASSWORD
         },
         body: JSON.stringify(webhookData)
-      });
+      };
+
+      // Si défini dans l'env, désactiver la vérification SSL (utile pour certificats auto-signés)
+      if (process.env.N8N_DISABLE_SSL_VERIFY === "true") {
+        fetchOptions.agent = new (await import("https")).Agent({
+          rejectUnauthorized: false
+        });
+      }
+
+      // Appel au webhook n8n
+      const webhookResponse = await fetch(process.env.N8N_WEBHOOK_LINK, fetchOptions);
 
       if (!webhookResponse.ok) {
         console.warn("Webhook notification failed:", await webhookResponse.text());
