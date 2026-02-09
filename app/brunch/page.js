@@ -3,17 +3,14 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import LoginForm from "../components/LoginForm";
+import { useAuth } from "../components/AuthContext";
 import DecryptedText from '../components/DecryptedText';
 import Hero from "../components/Hero";
-import Navbar from "../components/Navbar";
 import { Select, Option, Typography } from "@material-tailwind/react";
 
 export default function Brunch() {
 
-  const [authenticated, setAuthenticated] = useState(false);
-  const [adminAuthenticated, setAdminAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { authenticated, adminAuthenticated } = useAuth();
   const [usersLoading, setUsersLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [modalStep, setModalStep] = useState(1);
@@ -23,24 +20,6 @@ export default function Brunch() {
   const [newUser, setNewUser] = useState({ name: "", surname: "", email: "" });
   const [expandedUserId, setExpandedUserId] = useState(null);
   
-
-  useEffect(() => {
-    // Vérifie l'authentification en appelant l'API dédiée
-    async function checkAuth() {
-      try {
-        const res = await fetch("/api/check-auth");
-        const data = await res.json();
-        setAuthenticated(data.authenticated);
-        setAdminAuthenticated(data.adminAuthenticated);
-        setLoading(false);
-      } catch (error) {
-        console.error("Erreur lors de la vérification de l'authentification", error);
-        setAuthenticated(false);
-        setLoading(false);
-      }
-    }
-    checkAuth();
-  }, []);
 
   useEffect(() => {
     if (authenticated) {
@@ -121,16 +100,6 @@ export default function Brunch() {
     }
   }
 
-  const handleLoginSuccess = (role) => {
-    if (role === "admin") {
-      setAuthenticated(true);
-      setAdminAuthenticated(true);
-    } else {
-      setAuthenticated(true);
-      setAdminAuthenticated(false);
-    }
-  }
-
   function openModal() {
     setIsModalOpen(true);
     setModalStep(1);
@@ -174,28 +143,10 @@ export default function Brunch() {
       });
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-black p-8">
-        <div className="flex justify-center items-center">
-          {/* Demi rond stylisé qui tourne */}
-          <div className="w-12 h-12 border-4 border-orange border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!authenticated) {
-    return <LoginForm onSuccess={handleLoginSuccess} />;
-  }
-
   return (
-    <>
-        <Navbar current={"abonnements"} authenticated={authenticated} adminAuthenticated={adminAuthenticated} />
+      <main className="min-h-screen flex flex-col items-center justify-center bg-black p-4 lg:p-8">
         
-        <main className="min-h-screen flex flex-col items-center justify-center bg-black p-4 lg:p-8">
-        
-        <Hero adminAuthenticated={adminAuthenticated} subtitle="Abonnements aux brunchs" />
+        <Hero adminAuthenticated={adminAuthenticated} subtitle="Abonnements" />
         
         {/* Contenu principal */}
         {adminAuthenticated && (
@@ -730,6 +681,5 @@ export default function Brunch() {
             </div>
         
         </main>
-    </>
   );
 }
