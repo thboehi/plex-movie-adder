@@ -107,7 +107,7 @@ export default function Hero({ adminAuthenticated, subtitle }) {
           </p>
           )} */}
       </header>
-      
+
       {/* Section Information */}
       <div 
         className={`${boxWidth} z-10 mx-auto bg-gray-900/50 border border-gray-800 backdrop-blur-sm hover:border-orange p-4 rounded-md mb-16 text-sm transition-all duration-300 ease-in-out`}

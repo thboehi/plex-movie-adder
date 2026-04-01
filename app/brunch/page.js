@@ -7,6 +7,7 @@ import { useAuth } from "../components/AuthContext";
 import DecryptedText from '../components/DecryptedText';
 import Hero from "../components/Hero";
 import { Select, Option, Typography } from "@material-tailwind/react";
+import { ChevronDown } from "lucide-react";
 
 export default function Brunch() {
 
@@ -504,25 +505,15 @@ export default function Brunch() {
             <div className="w-full max-w-2xl mx-auto">
             {/* Afficher chaque utilisateur et sa date d'expiration de l'abonnement */}
             <h2 className="text-lg text-white font-bold mb-4 text-center">Abonnements aux brunchs actifs</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="flex flex-col gap-1.5">
             {usersLoading ? (
-              // Skeleton loader pour les cartes utilisateurs
+              // Skeleton loader
               [...Array(4)].map((_, index) => (
                 <div 
                   key={index} 
-                  className="aspect-square flex flex-col items-center justify-center bg-gray-950 border border-gray-800 p-3 rounded-md text-sm"
+                  className="relative border border-gray-800 rounded-lg overflow-hidden h-14 bg-gray-700"
                 >
-                  <div className="relative w-full">
-                  <div className="h-6 w-20 mb-2 mx-auto bg-gray-700 rounded-md overflow-hidden relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
-                </div>
-                <div className="h-3 w-16 mx-auto bg-gray-700 rounded-md mb-2 overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
-                </div>
-                <div className="h-3 w-14 mx-auto bg-gray-700 rounded-md overflow-hidden relative">
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-700 via-gray-600 to-gray-700 animate-[shimmer_1.5s_infinite]"></div>
-                </div>
-                  </div>
                 </div>
               ))
               ) : (
@@ -533,115 +524,113 @@ export default function Brunch() {
                     const subscriptionEnd = new Date(user.subscriptionEnd);
                     const timeRemaining = subscriptionEnd - now;
                     const daysRemaining = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-                    const hoursRemaining = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     
                     // Vérifier si l'abonnement se termine dans 7 jours ou moins
                     const isAboutToExpire = daysRemaining <= 7;
+                    const isExpired = daysRemaining < 0;
                     const isExpanded = expandedUserId === user._id;
-                    
-                    // Construire le message du temps restant
-                    let timeRemainingMessage;
-                    if (daysRemaining < 0) {
-                        timeRemainingMessage = "Abonnement expiré";
-                    } else if (isAboutToExpire) {
-                        timeRemainingMessage = `Expire dans ${daysRemaining}j`;
-                    } else {
-                        timeRemainingMessage = "Jusqu'au";
-                    }
+
+                    // Couleur de la pastille
+                    const dotColor = isExpired ? 'bg-red-500/50' : isAboutToExpire ? 'bg-orange/50' : 'bg-green-500/50';
                     
                     return (
                       <div 
                         key={user._id}
-                        style={{
-                          gridColumn: isExpanded ? "1 / -1" : "auto"
-                        }}
-                        onClick={() => setExpandedUserId(isExpanded ? null : user._id)}
-                        className={`${
-                          isExpanded 
-                            ? 'col-span-full p-6' 
-                            : 'aspect-square p-3'
-                        } flex flex-col ${
-                          isExpanded ? 'items-start' : 'items-center justify-center'
-                        } bg-gray-900/50 backdrop-blur-sm border ${
-                          isAboutToExpire ? 'border-red-600' : 'border-gray-800'
-                        } rounded-lg text-sm transition-all hover:shadow-lg cursor-pointer ${
-                          !isExpanded && 'hover:scale-105'
-                        } z-10`}
+                        style={{ animation: `fadeIn 0.3s ease-out ${index * 0.03}s both` }}
+                        className={`border ${isAboutToExpire ? 'border-red-900/50' : 'border-gray-800'} rounded-lg overflow-hidden bg-gray-900/30 backdrop-blur-sm hover:border-gray-700 transition-all`}
                       >
-                        {!isExpanded ? (
-                          // Vue compacte
-                          <>
-                            <p className="text-base font-bold text-center leading-tight text-white">{user.name} {user.surname}</p>
-                            <p className={`text-[10px] mt-2 text-center ${isAboutToExpire ? 'text-red-400' : 'text-gray-400'}`}>{timeRemainingMessage}</p>
-                            <p className={`font-bold text-xs text-center ${isAboutToExpire ? 'text-red-400' : 'text-white'}`}>
-                              {isAboutToExpire ? '' : new Date(user.subscriptionEnd).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                        {/* Ligne compacte */}
+                        <div
+                          onClick={() => setExpandedUserId(isExpanded ? null : user._id)}
+                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-800/30 transition-colors"
+                        >
+                          {/* Avatar initiales */}
+                          <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-bold text-gray-300">{user.name.charAt(0)}{user.surname.charAt(0)}</span>
+                          </div>
+
+                          {/* Nom */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-medium text-white truncate">{user.name} {user.surname}</h3>
+                            <p className="text-xs text-gray-500">
+                              {isExpired 
+                                ? 'Expiré' 
+                                : `Expire le ${subscriptionEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}`
+                              }
                             </p>
-                          </>
-                        ) : (
-                          // Vue détaillée
-                          <div className="w-full space-y-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="text-2xl font-bold text-white">{user.name} {user.surname}</h3>
-                                <p className="text-sm text-gray-400">{user.email}</p>
-                              </div>
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setExpandedUserId(null);
-                                }}
-                                className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-                              >
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </button>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div className="bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-400 mb-1">Type d'abonnement</p>
-                                <p className="font-bold capitalize text-white">{user.subscription?.currentType === 'annual' ? 'Annuel' : user.subscription?.currentType === 'quarterly' ? 'Trimestriel' : user.subscription?.currentType === 'trial' ? 'Essai' : 'N/A'}</p>
-                              </div>
-                              
-                              <div className="bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-400 mb-1">Expire le</p>
-                                <p className={`font-bold ${isAboutToExpire ? 'text-red-400' : 'text-white'}`}>
-                                  {new Date(user.subscriptionEnd).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          </div>
+
+                          {/* Jours restants */}
+                          <span className={`text-xs shrink-0 hidden sm:block ${isExpired ? 'text-red-400' : isAboutToExpire ? 'text-orange' : 'text-gray-500'}`}>
+                            {isExpired ? 'expiré' : `${daysRemaining}j restants`}
+                          </span>
+
+                          {/* Pastille + chevron */}
+                          <span className={`w-2 h-2 rounded-full ${dotColor} shrink-0`}></span>
+                          <ChevronDown
+                            size={14}
+                            className={`text-gray-600 transition-transform shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+                          />
+                        </div>
+
+                        {/* Détails expansés */}
+                        {isExpanded && (
+                          <div className="px-4 pb-4 border-t border-gray-800/50" style={{ animation: 'fadeIn 0.2s ease-out' }}>
+                            <div className="grid grid-cols-2 gap-3 mt-3">
+                              <div className="bg-gray-800/50 p-3 rounded-lg">
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Abonnement</p>
+                                <p className="text-sm font-semibold text-white capitalize">
+                                  {user.subscription?.currentType === 'annual' ? 'Annuel' : user.subscription?.currentType === 'quarterly' ? 'Trimestriel' : user.subscription?.currentType === 'trial' ? 'Essai' : 'N/A'}
                                 </p>
                               </div>
                               
-                              <div className="bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-400 mb-1">Dernier paiement</p>
-                                <p className="font-bold text-white">
+                              <div className="bg-gray-800/50 p-3 rounded-lg">
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Expire le</p>
+                                <p className={`text-sm font-semibold ${isAboutToExpire ? 'text-red-400' : 'text-white'}`}>
+                                  {subscriptionEnd.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                </p>
+                              </div>
+                              
+                              <div className="bg-gray-800/50 p-3 rounded-lg">
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Dernier paiement</p>
+                                <p className="text-sm font-semibold text-white">
                                   {user.subscription?.lastPaymentAmount ? `${user.subscription.lastPaymentAmount} CHF` : 'N/A'}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                  {user.subscription?.lastPaymentDate ? new Date(user.subscription.lastPaymentDate).toLocaleDateString('fr-FR') : ''}
-                                </p>
+                                {user.subscription?.lastPaymentDate && (
+                                  <p className="text-[10px] text-gray-500 mt-0.5">
+                                    {new Date(user.subscription.lastPaymentDate).toLocaleDateString('fr-FR')}
+                                  </p>
+                                )}
                               </div>
                               
-                              <div className="bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-400 mb-1">Temps restant</p>
-                                <p className={`font-bold ${isAboutToExpire ? 'text-red-400' : 'text-white'}`}>
-                                  {daysRemaining >= 0 ? `${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''}` : 'Expiré'}
+                              <div className="bg-gray-800/50 p-3 rounded-lg">
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Temps restant</p>
+                                <p className={`text-sm font-semibold ${isExpired ? 'text-red-400' : isAboutToExpire ? 'text-orange' : 'text-white'}`}>
+                                  {isExpired ? 'Expiré' : `${daysRemaining} jour${daysRemaining !== 1 ? 's' : ''}`}
                                 </p>
                               </div>
                             </div>
+
+                            {adminAuthenticated && (
+                              <div className="mt-3 bg-gray-800/50 p-3 rounded-lg">
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Email</p>
+                                <p className="text-sm text-white">{user.email}</p>
+                              </div>
+                            )}
                             
                             {user.subscription?.history && user.subscription.history.length > 0 && (
-                              <div className="bg-gray-800 p-4 rounded-lg">
-                                <p className="text-xs text-gray-400 mb-2">Historique des paiements</p>
+                              <div className="mt-3 bg-gray-800/50 p-3 rounded-lg">
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Historique des paiements</p>
                                 <div className="space-y-2 max-h-40 overflow-y-auto">
                                   {(adminAuthenticated ? user.subscription.history : user.subscription.history.slice(-1)).map((entry, idx) => (
-                                    <div key={idx} className="flex justify-between items-center text-sm border-b border-gray-700 pb-2 last:border-0">
+                                    <div key={idx} className="flex justify-between items-center text-sm border-b border-gray-700/50 pb-2 last:border-0">
                                       <div>
-                                        <p className="font-medium text-white">{entry.amount} CHF - {entry.months} mois</p>
-                                        <p className="text-xs text-gray-400">
+                                        <p className="font-medium text-white text-xs">{entry.amount} CHF - {entry.months} mois</p>
+                                        <p className="text-[10px] text-gray-500">
                                           {new Date(entry.date).toLocaleDateString('fr-FR')}
                                         </p>
                                       </div>
-                                      <span className={`text-xs px-2 py-1 rounded-full ${
+                                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${
                                         entry.type === 'annual' ? 'bg-orange/10 text-orange' : 
                                         entry.type === 'quarterly' ? 'bg-gray-700 text-gray-300' :
                                         'bg-green-900 text-green-300'
@@ -654,7 +643,7 @@ export default function Brunch() {
                               </div>
                             )}
                             
-                            <p className="text-xs text-gray-500 text-center mt-2">
+                            <p className="text-[10px] text-gray-600 text-center mt-3">
                               Membre depuis {new Date(user.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                             </p>
                           </div>

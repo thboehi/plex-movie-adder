@@ -2,6 +2,9 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/app/utils/db";
 
+const TMDB_ACCESS_TOKEN = process.env.TMDB_ACCESS_TOKEN;
+const TMDB_BASE = "https://api.themoviedb.org/3";
+
 // Fonction utilitaire pour récupérer l'IP depuis les headers de la requête
 function getIp(request) {
   return (
@@ -9,6 +12,22 @@ function getIp(request) {
     request.headers.get("x-real-ip") ||
     "unknown"
   );
+}
+
+// Récupère les IDs externes (imdb, tvdb) depuis TMDB
+async function fetchExternalIds(tmdbID, type) {
+  try {
+    const mediaType = type === "tv" ? "tv" : "movie";
+    const url = `${TMDB_BASE}/${mediaType}/${tmdbID}/external_ids`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${TMDB_ACCESS_TOKEN}` },
+    });
+    if (!response.ok) return {};
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching external IDs:", error);
+    return {};
+  }
 }
 
 // GET : Renvoie la liste des films NON supprimés
@@ -38,28 +57,47 @@ export async function POST(request) {
     const { db } = await connectToDatabase();
     const added_date = new Date();
 
-    // Vérifier si le film existe déjà
+    // Validation : tmdbID requis (entier positif)
+    if (!movie.tmdbID || typeof movie.tmdbID !== "number" || movie.tmdbID <= 0) {
+      return NextResponse.json(
+        { error: "Missing or invalid tmdbID" },
+        { status: 400 }
+      );
+    }
+
+    // Enrichir avec les IDs externes (imdbID, tvdbID)
+    const externalIds = await fetchExternalIds(movie.tmdbID, movie.Type);
+    const imdbID = externalIds.imdb_id || null;
+    const tvdbID = externalIds.tvdb_id || null;
+
+    // Vérifier si le film existe déjà (par tmdbID ou imdbID pour compat)
     const existingMovie = await db
       .collection("movies")
-      .findOne({ imdbID: movie.imdbID });
+      .findOne({ $or: [{ tmdbID: movie.tmdbID }, ...(imdbID ? [{ imdbID }] : [])] });
 
     if (existingMovie) {
       if (!existingMovie.deleted) {
-        // Le film existe déjà et n'est pas supprimé, on renvoie une erreur
         return NextResponse.json(
           { error: "Movie already exists" },
           { status: 400 }
         );
       } else {
-        // Le film était supprimé, on le restaure en mettant à jour les infos
+        // Le film était supprimé, on le restaure
         await db.collection("movies").updateOne(
-          { imdbID: movie.imdbID },
+          { _id: existingMovie._id },
           {
             $set: {
-              ...movie,
+              tmdbID: movie.tmdbID,
+              imdbID,
+              tvdbID,
+              Title: movie.Title,
+              originalTitle: movie.originalTitle || movie.Title,
+              Year: movie.Year,
+              Poster: movie.Poster,
+              Type: movie.Type,
+              deep_waitlist: movie.deep_waitlist || false,
               deleted: false,
               added_by: ip,
-              // On peut aussi effacer le champ deleted_by si présent
               deleted_by: null,
               deleted_date: null,
               added_date,
@@ -68,14 +106,22 @@ export async function POST(request) {
         );
         const updatedMovie = await db
           .collection("movies")
-          .findOne({ imdbID: movie.imdbID });
+          .findOne({ _id: existingMovie._id });
         return NextResponse.json(updatedMovie, { status: 200 });
       }
     }
 
-    // Ajout d'un nouveau film avec l'IP de l'ajout et deleted à false
+    // Ajout d'un nouveau film
     const movieToInsert = {
-      ...movie,
+      tmdbID: movie.tmdbID,
+      imdbID,
+      tvdbID,
+      Title: movie.Title,
+      originalTitle: movie.originalTitle || movie.Title,
+      Year: movie.Year,
+      Poster: movie.Poster,
+      Type: movie.Type,
+      deep_waitlist: movie.deep_waitlist || false,
       added_by: ip,
       added_date,
       deleted: false,
@@ -86,25 +132,22 @@ export async function POST(request) {
 
     // Notification à n8n
     try {
-      // Import dynamique de node-fetch et https pour le bypass SSL
       const fetch = (await import('node-fetch')).default;
       const https = await import('https');
       
-      // Préparer les données pour le webhook
       const webhookData = {
         title: movie.Title,
         year: movie.Year,
-        imdbID: movie.imdbID,
+        tmdbID: movie.tmdbID,
+        imdbID,
         poster: movie.Poster,
-        added_date: added_date
+        type: movie.Type,
+        deep_waitlist: movie.deep_waitlist || false,
+        added_date,
       };
 
-      // Agent HTTPS avec rejectUnauthorized désactivé
-      const httpsAgent = new https.Agent({
-        rejectUnauthorized: false
-      });
+      const httpsAgent = new https.Agent({ rejectUnauthorized: false });
 
-      // Appel au webhook n8n avec node-fetch
       const webhookResponse = await fetch(process.env.N8N_WEBHOOK_LINK, {
         method: "POST",
         headers: {
@@ -117,11 +160,8 @@ export async function POST(request) {
 
       if (!webhookResponse.ok) {
         console.warn("Webhook notification failed:", await webhookResponse.text());
-      } else {
-        console.log("Webhook notification sent successfully");
       }
     } catch (webhookError) {
-      // On ne bloque pas le flux principal en cas d'erreur du webhook
       console.error("Error sending webhook notification:", webhookError);
     }
 
@@ -136,20 +176,22 @@ export async function POST(request) {
   }
 }
 
-// PATCH : Met à jour la note d'un film (admin uniquement)
+// PATCH : Met à jour la note ou le deep_waitlist d'un film (admin uniquement)
 export async function PATCH(request) {
   try {
-    const { imdbID, admin_note } = await request.json();
+    const body = await request.json();
+    const { imdbID, tmdbID, admin_note, deep_waitlist } = body;
     
-    // Validation
-    if (!imdbID) {
+    // On accepte identification par tmdbID ou imdbID
+    if (!tmdbID && !imdbID) {
       return NextResponse.json(
-        { error: "Missing imdbID" },
+        { error: "Missing tmdbID or imdbID" },
         { status: 400 }
       );
     }
     
-    if (typeof imdbID !== 'string' || !/^tt\d+$/.test(imdbID)) {
+    // Validation imdbID si fourni
+    if (imdbID && (typeof imdbID !== 'string' || !/^tt\d+$/.test(imdbID))) {
       return NextResponse.json(
         { error: "Invalid imdbID format" },
         { status: 400 }
@@ -158,10 +200,17 @@ export async function PATCH(request) {
     
     const { db } = await connectToDatabase();
     
-    // Mettre à jour la note
+    // Construire le filtre de recherche
+    const filter = tmdbID ? { tmdbID } : { imdbID };
+    
+    // Construire les champs à mettre à jour
+    const updateFields = { note_updated_at: new Date() };
+    if (admin_note !== undefined) updateFields.admin_note = admin_note || null;
+    if (deep_waitlist !== undefined) updateFields.deep_waitlist = !!deep_waitlist;
+    
     const result = await db.collection("movies").updateOne(
-      { imdbID },
-      { $set: { admin_note: admin_note || null, note_updated_at: new Date() } }
+      filter,
+      { $set: updateFields }
     );
     
     if (result.matchedCount === 0) {
@@ -171,35 +220,34 @@ export async function PATCH(request) {
       );
     }
     
-    // Récupérer le film mis à jour
-    const updatedMovie = await db.collection("movies").findOne({ imdbID });
+    const updatedMovie = await db.collection("movies").findOne(filter);
     
     return NextResponse.json(updatedMovie);
   } catch (error) {
     console.error("Error in PATCH:", error);
     return NextResponse.json(
-      { error: "Failed to update movie note" },
+      { error: "Failed to update movie" },
       { status: 500 }
     );
   }
 }
 
-// DELETE : Au lieu de supprimer définitivement, on met le film en "trash"
-// en mettant à jour le champ "deleted" et en enregistrant l'IP dans "deleted_by"
+// DELETE : Soft-delete un film (marque deleted=true)
 export async function DELETE(request) {
   try {
     const { searchParams } = new URL(request.url);
     const imdbID = searchParams.get("imdbID");
+    const tmdbID = searchParams.get("tmdbID");
     
-    // Validation stricte de l'imdbID
-    if (!imdbID) {
+    if (!imdbID && !tmdbID) {
       return NextResponse.json(
-        { error: "Missing imdbID" },
+        { error: "Missing imdbID or tmdbID" },
         { status: 400 }
       );
     }
     
-    if (typeof imdbID !== 'string' || !/^tt\d+$/.test(imdbID)) {
+    // Validation imdbID si fourni
+    if (imdbID && (typeof imdbID !== 'string' || !/^tt\d+$/.test(imdbID))) {
       return NextResponse.json(
         { error: "Invalid imdbID format" },
         { status: 400 }
@@ -209,9 +257,11 @@ export async function DELETE(request) {
     const ip = getIp(request);
     const deleted_date = new Date();
     const { db } = await connectToDatabase();
-    // Au lieu de supprimer, on met à jour le document pour le marquer comme supprimé
+    
+    const filter = tmdbID ? { tmdbID: parseInt(tmdbID, 10) } : { imdbID };
+    
     const result = await db.collection("movies").updateOne(
-      { imdbID },
+      filter,
       { $set: { deleted: true, deleted_by: ip, deleted_date } }
     );
     if (result.modifiedCount === 0) {

@@ -21,6 +21,7 @@
     "dotenv": "^17.2.3",
     "framer-motion": "^12.4.3",
     "jose": "^5.9.6",
+    "lucide-react": "^1.7.0",
     "mongodb": "^6.13.0",
     "next": "^16.0.10",
     "node-fetch": "^2.7.0",
