@@ -11,8 +11,11 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// POST : Migre les films existants (deleted=false) sans tmdbID
-// Protégé par auth admin (vérifie le header)
+const DELAY_MS = 100;
+
+// POST : Migre les films existants sans tmdbID, par batch
+// Usage : curl -X POST /api/migrate?limit=10 -H "x-admin-password: ..."
+// Relancer plusieurs fois jusqu'à ce que total=0
 export async function POST(request) {
   try {
     // Vérification admin simple via le header
@@ -21,31 +24,21 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const limit = Math.min(parseInt(searchParams.get("limit") || "8", 10), 20);
+
     const { db } = await connectToDatabase();
 
-    // Trouver tous les films actifs sans tmdbID
+    // Trouver les films sans tmdbID (batch limité)
     const moviesToMigrate = await db
       .collection("movies")
-      .find({  tmdbID: { $exists: false } })
+      .find({ $or: [{ tmdbID: { $exists: false } }, { tmdbID: null }] })
+      .limit(limit)
       .toArray();
 
-    // Aussi chercher ceux qui ont tmdbID null
-    const moviesToMigrate2 = await db
-      .collection("movies")
-      .find({ tmdbID: null })
-      .toArray();
+    const report = { total: moviesToMigrate.length, migrated: 0, failed: 0, errors: [] };
 
-    // Dédupliquer
-    const allMovies = [...moviesToMigrate];
-    for (const m of moviesToMigrate2) {
-      if (!allMovies.some((am) => am._id.toString() === m._id.toString())) {
-        allMovies.push(m);
-      }
-    }
-
-    const report = { total: allMovies.length, migrated: 0, failed: 0, errors: [] };
-
-    for (const movie of allMovies) {
+    for (const movie of moviesToMigrate) {
       try {
         if (!movie.imdbID) {
           report.failed++;
@@ -66,7 +59,7 @@ export async function POST(request) {
             imdbID: movie.imdbID,
             reason: `TMDB API error: ${findResponse.status}`,
           });
-          await delay(300);
+          await delay(DELAY_MS);
           continue;
         }
 
@@ -91,7 +84,7 @@ export async function POST(request) {
             imdbID: movie.imdbID,
             reason: "Not found on TMDB",
           });
-          await delay(300);
+          await delay(DELAY_MS);
           continue;
         }
 
@@ -129,7 +122,7 @@ export async function POST(request) {
         );
 
         report.migrated++;
-        await delay(300); // Rate limiting
+        await delay(DELAY_MS); // Rate limiting
       } catch (error) {
         report.failed++;
         report.errors.push({
@@ -137,7 +130,7 @@ export async function POST(request) {
           imdbID: movie.imdbID,
           reason: error.message,
         });
-        await delay(300);
+        await delay(DELAY_MS);
       }
     }
 
